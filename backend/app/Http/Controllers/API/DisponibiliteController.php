@@ -22,7 +22,8 @@ class DisponibiliteController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $disponibilite = Disponibilite::create($request->all());
+        return response()->json($disponibilite);
     }
 
     /**
