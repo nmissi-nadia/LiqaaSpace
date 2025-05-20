@@ -1,5 +1,4 @@
 # LiqaaSpace
-Plateforme de réservation de salles de réunion
 # Plateforme de Réservation de Salles de Réunion
 
 ## Contexte
