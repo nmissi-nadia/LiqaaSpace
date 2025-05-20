@@ -30,7 +30,8 @@ class SalleController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $salle = Salle::findOrFail($id);
+        return response()->json($salle);
     }
 
     /**
