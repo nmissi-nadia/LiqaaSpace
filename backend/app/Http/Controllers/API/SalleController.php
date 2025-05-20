@@ -39,7 +39,9 @@ class SalleController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $salle = Salle::findOrFail($id);
+        $salle->update($request->all());
+        
     }
 
     /**
