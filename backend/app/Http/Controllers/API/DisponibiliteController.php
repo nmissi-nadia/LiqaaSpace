@@ -31,7 +31,8 @@ class DisponibiliteController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $disponibilite=Disponibilite::findOrFail($id);
+        return response()->json($disponibilite);
     }
 
     /**
