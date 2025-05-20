@@ -40,7 +40,9 @@ class DisponibiliteController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $disponibilite=Disponibilite::findOrFail($id);
+        $disponibilite->update($request->all());
+        return response()->json($disponibilite);
     }
 
     /**
@@ -48,6 +50,8 @@ class DisponibiliteController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $disponibilite=Disponibilite::findOrFail($id);
+        $disponibilite->delete();
+        return response()->json($disponibilite);
     }
 }
