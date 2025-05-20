@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('nom');
             $table->string('description');
             $table->json('images')->nullable();
+            // id du responsable qui cree la salle
+            $table->foreignId('responsable_id')->constrained('users')->cascadeOnDelete();
             $table->string('location');
             $table->string('capacite');
             $table->string('status');

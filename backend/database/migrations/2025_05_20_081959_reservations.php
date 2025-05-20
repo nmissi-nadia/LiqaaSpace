@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('date');
             $table->string('heure_debut');
             $table->string('heure_fin');
+            // 
+            $table->foreignId('collaborateur_id')->constrained('users')->cascadeOnDelete();
             // id de la salle foreign key
             $table->foreignId('salle_id')->constrained('salles')->cascadeOnDelete();
             $table->string('status');
