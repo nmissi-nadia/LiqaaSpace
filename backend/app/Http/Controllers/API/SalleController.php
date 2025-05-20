@@ -41,7 +41,7 @@ class SalleController extends Controller
     {
         $salle = Salle::findOrFail($id);
         $salle->update($request->all());
-        
+        return response()->json($salle);
     }
 
     /**
@@ -49,6 +49,8 @@ class SalleController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $salle = Salle::findOrFail($id);
+        $salle->delete();
+        return response()->json($salle);
     }
 }
