@@ -12,7 +12,8 @@ class SalleController extends Controller
      */
     public function index()
     {
-        //
+        $salles = Salle::all();
+        return response()->json($salles);
     }
 
     /**
@@ -20,7 +21,8 @@ class SalleController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $salle = Salle::create($request->all());
+        return response()->json($salle);
     }
 
     /**
