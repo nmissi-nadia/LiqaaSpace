@@ -101,7 +101,6 @@ class AuthController extends Controller
             }
         );
 
-        // Retourne une réponse JSON claire
         if ($status === Password::PASSWORD_RESET) {
             return response()->json([
                 'status' => 'success',
