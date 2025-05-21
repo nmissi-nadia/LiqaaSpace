@@ -62,17 +62,74 @@ class AuthController extends Controller
         return response()->json(['message' => 'Deconnexion Reussi']);
     }
     // fonction pour le mot de passe oublié
-    public function Mpsasseoubli(Request $request){
-        $request->validate([
-            'email'=>'required|email'
-        ]);
+    public function Mpsasseoubli(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        // En développement, simuler l'envoi
+        if (app()->environment('local')) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Lien de réinitialisation envoyé (simulé en développement)'
+            ]);
+        }
+
+        // Code de production
         $status = Password::sendResetLink($request->only('email'));
-        return $status == Password::RESET_LINK_SENT
-        ? back()->with('status', __($status))
-        : back()->withInput()->withErrors(['email' => __($status)]);
+        return $status === Password::RESET_LINK_SENT
+            ? response()->json(['status' => __($status)])
+            : response()->json(['email' => __($status)], 422);
     }
     // fonction pour reset mot de passe 
-     
+    public function resetMps(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user) use ($request) {
+                $user->forceFill([
+                    'password' => Hash::make($request->password),
+                    'remember_token' => Str::random(60),
+                ])->save();
+                
+                event(new PasswordReset($user));
+            }
+        );
+
+        // Retourne une réponse JSON claire
+        if ($status === Password::PASSWORD_RESET) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Le mot de passe a été réinitialisé avec succès.'
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Impossible de réinitialiser le mot de passe. Veuillez vérifier vos informations.'
+        ], 422);
+    }
+    // fonction pour changer le mot de passe
+    public function changeMps(Request $request){
+        $request->validate([
+            'password'=>'required|string|min:8|confirmed',
+        ]);
+        $user = Auth::user();
+        $user->forceFill([
+            'password'=>Hash::make($request->password),
+            'remember_token'=>Str::random(60),
+        ])->setRememberToken(Str::random(60));
+        $user->save();
+        event(new PasswordReset($user));
+        return response()->json([
+            'status' => 'Mot de passe reinitialise avec succes'
+        ]);
+    }
     
 
 }
