@@ -12,7 +12,8 @@ class ReservationController extends Controller
      */
     public function index()
     {
-        //
+        $reservations = Reservation::all();
+        return response()->json($reservations);
     }
 
     /**
@@ -20,7 +21,18 @@ class ReservationController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'salle_id' => 'required|exists:salles,id',
+            'user_id' => 'required|exists:users,id',
+            'date_debut' => 'required|date',
+            'date_fin' => 'required|date',
+            'statut' => 'required|string|in:confirmé,annulé',
+        ]);
+        $reservation = Reservation::create($request->all());
+        return response()->json([
+            'message' => 'Reservation créée avec succès',
+            'data' => $reservation->load('salle', 'user')
+        ], 201);
     }
 
     /**
@@ -28,7 +40,11 @@ class ReservationController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $reservation = Reservation::findOrFail($id);
+        return response()->json([
+            'message' => 'Reservation récupérée avec succès',
+            'data' => $reservation->load('salle', 'user')
+        ]);
     }
 
     /**
@@ -36,7 +52,19 @@ class ReservationController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $request->validate([
+            'salle_id' => 'required|exists:salles,id',
+            'user_id' => 'required|exists:users,id',
+            'date_debut' => 'required|date',
+            'date_fin' => 'required|date',
+            'statut' => 'required|string|in:confirmé,annulé',
+        ]);
+        $reservation = Reservation::findOrFail($id);
+        $reservation->update($request->all());
+        return response()->json([
+            'message' => 'Reservation mise à jour avec succès',
+            'data' => $reservation->load('salle', 'user')
+        ]);
     }
 
     /**
@@ -44,6 +72,11 @@ class ReservationController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $reservation = Reservation::findOrFail($id);
+        $reservation->delete();
+        return response()->json([
+            'message' => 'Reservation supprimée avec succès',
+            'data' => $reservation->load('salle', 'user')
+        ]);
     }
 }
