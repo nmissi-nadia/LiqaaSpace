@@ -55,6 +55,22 @@ class AuthController extends Controller
             'user' => $user
         ]);
     }
+
+    // fonction logout
+    public function logout(Request $request){
+        $request->user()->currentAccessToken()->delete();
+        return response()->json(['message' => 'Deconnexion Reussi']);
+    }
+    // fonction pour le mot de passe oublié
+    public function Mpsasseoubli(Request $request){
+        $request->validate([
+            'email'=>'required|email'
+        ]);
+        $status = Password::sendResetLink($request->only('email'));
+        return $status == Password::RESET_LINK_SENT
+        ? back()->with('status', __($status))
+        : back()->withInput()->withErrors(['email' => __($status)]);
+    }
      
     
 
