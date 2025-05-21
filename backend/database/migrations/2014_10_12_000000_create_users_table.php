@@ -19,6 +19,8 @@ return new class extends Migration
             $table->string('password');
             // role d'utilisateur admin ou collaborateur ou responsable
             $table->string('role')->default('colaborateur');
+            $table->string('profil')->nullable();
+            $table->string('status')->default('active');
             $table->rememberToken();
             $table->timestamps();
         });
