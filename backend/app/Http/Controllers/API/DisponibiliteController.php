@@ -22,8 +22,18 @@ class DisponibiliteController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'salle_id' => 'required|exists:salles,id',
+            'date' => 'required|date',
+            'heure_debut' => 'required|date_format:H:i',
+            'heure_fin' => 'required|date_format:H:i',
+            'statut' => 'required|string|in:disponible,occupé',
+        ]);
         $disponibilite = Disponibilite::create($request->all());
-        return response()->json($disponibilite);
+        return response()->json([
+            'message' => 'Disponibilité créée avec succès',
+            'data' => $disponibilite->load('salle')
+        ], 201);
     }
 
     /**
@@ -32,7 +42,10 @@ class DisponibiliteController extends Controller
     public function show(string $id)
     {
         $disponibilite=Disponibilite::findOrFail($id);
-        return response()->json($disponibilite);
+        return response()->json([
+            'message' => 'Disponibilité récupérée avec succès',
+            'data' => $disponibilite->load('salle')
+        ]);
     }
 
     /**
@@ -40,9 +53,19 @@ class DisponibiliteController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $request->validate([
+            'salle_id' => 'required|exists:salles,id',
+            'date' => 'required|date',
+            'heure_debut' => 'required|date_format:H:i',
+            'heure_fin' => 'required|date_format:H:i',
+            'statut' => 'required|string|in:disponible,occupé',
+        ]);
         $disponibilite=Disponibilite::findOrFail($id);
         $disponibilite->update($request->all());
-        return response()->json($disponibilite);
+        return response()->json([
+            'message' => 'Disponibilité mise à jour avec succès',
+            'data' => $disponibilite->load('salle')
+        ]);
     }
 
     /**
@@ -52,6 +75,9 @@ class DisponibiliteController extends Controller
     {
         $disponibilite=Disponibilite::findOrFail($id);
         $disponibilite->delete();
-        return response()->json($disponibilite);
+        return response()->json([
+            'message' => 'Disponibilité supprimée avec succès',
+            'data' => $disponibilite->load('salle')
+        ]);
     }
 }
