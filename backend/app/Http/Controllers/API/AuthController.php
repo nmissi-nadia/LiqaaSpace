@@ -71,6 +71,7 @@ class AuthController extends Controller
         ? back()->with('status', __($status))
         : back()->withInput()->withErrors(['email' => __($status)]);
     }
+    // fonction pour reset mot de passe 
      
     
 
