@@ -11,17 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('salle_disponibilites', function (Blueprint $table) {
+        Schema::create('reservations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('salle_id')->constrained('salles')->onDelete('cascade');
+            $table->foreignId('collaborateur_id')->constrained('users')->onDelete('cascade');
             $table->date('date');
             $table->time('heure_debut');
             $table->time('heure_fin');
-            $table->enum('statut', ['disponible', 'reservee'])->default('disponible');
+            $table->enum('statut', ['en attente', 'accepté', 'refusé'])->default('en attente');
             $table->timestamps();
-
-            // Index pour optimiser les requêtes
-            $table->index(['salle_id', 'date']);
         });
     }
 
@@ -30,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('salle_disponibilites');
+        Schema::dropIfExists('reservations');
     }
 };

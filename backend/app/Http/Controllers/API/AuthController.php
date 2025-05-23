@@ -12,9 +12,40 @@ use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password as PasswordRule;
 
+/**
+ * @OA\Tag(
+ *     name="Authentification",
+ *     description="API Endpoints pour la gestion de l'authentification et des utilisateurs"
+ * )
+ */
 class AuthController extends Controller
 {
-    // fonction concerné par le register
+    /**
+     * @OA\Post(
+     *     path="/api/register",
+     *     summary="Enregistrement d'un nouvel utilisateur",
+     *     tags={"Authentification"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name","email","password","password_confirmation","role"},
+     *             @OA\Property(property="name", type="string", example="John Doe"),
+     *             @OA\Property(property="email", type="string", format="email", example="user@example.com"),
+     *             @OA\Property(property="password", type="string", format="password", example="password"),
+     *             @OA\Property(property="password_confirmation", type="string", format="password", example="password"),
+     *             @OA\Property(property="role", type="string", enum={"admin","collaborateur","responsable"}, example="collaborateur")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Utilisateur enregistré avec succès"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Erreur de validation"
+     *     )
+     * )
+     */
     public function register(Request $request)
     {
         $request->validate([
@@ -32,36 +63,92 @@ class AuthController extends Controller
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
-        // return avec ceci une message de succues aussi
+        
         return response()->json([
-            'message' => 'inscription reussie',
+            'message' => 'Inscription réussie',
             'access_token' => $token,
             'token_type' => 'Bearer',
             'user' => $user
-        ]);
+        ], 201);
     }
-    // fonction pour le login 
+
+    /**
+     * @OA\Post(
+     *     path="/api/login",
+     *     summary="Connexion d'un utilisateur",
+     *     tags={"Authentification"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"email","password"},
+     *             @OA\Property(property="email", type="string", format="email", example="user@example.com"),
+     *             @OA\Property(property="password", type="string", format="password", example="password")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Connexion réussie"
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Identifiants invalides"
+     *     )
+     * )
+     */
     public function login(Request $request)
     {
         if(!Auth::attempt($request->only('email','password'))){
-            return response()->json(['message'=> 'Invalid login details'], 401);
+            return response()->json(['message'=> 'Email ou mot de passe incorrect'], 401);
         }
         $user = User::where('email',$request['email'])->firstOrFail();
         $token=$user->createToken('auth_token')->plainTextToken;
         return response()->json([
             'access_token' => $token,
             'token_type' => 'Bearer',
-            'message' => 'Connexion Reussi',
+            'message' => 'Connexion réussie',
             'user' => $user
         ]);
     }
 
-    // fonction logout
+    /**
+     * @OA\Post(
+     *     path="/api/logout",
+     *     summary="Déconnexion de l'utilisateur",
+     *     tags={"Authentification"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Déconnexion réussie"
+     *     )
+     * )
+     */
     public function logout(Request $request){
         $request->user()->currentAccessToken()->delete();
-        return response()->json(['message' => 'Deconnexion Reussi']);
+        return response()->json(['message' => 'Déconnexion réussie']);
     }
-    // fonction pour le mot de passe oublié
+
+    /**
+     * @OA\Post(
+     *     path="/api/forgot-password",
+     *     summary="Demande de réinitialisation de mot de passe",
+     *     tags={"Authentification"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"email"},
+     *             @OA\Property(property="email", type="string", format="email", example="user@example.com")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lien de réinitialisation envoyé"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Erreur de validation"
+     *     )
+     * )
+     */
     public function Mpsasseoubli(Request $request)
     {
         $request->validate(['email' => 'required|email']);
@@ -80,7 +167,32 @@ class AuthController extends Controller
             ? response()->json(['status' => __($status)])
             : response()->json(['email' => __($status)], 422);
     }
-    // fonction pour reset mot de passe 
+
+    /**
+     * @OA\Post(
+     *     path="/api/reset-password",
+     *     summary="Réinitialisation du mot de passe",
+     *     tags={"Authentification"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"token","email","password","password_confirmation"},
+     *             @OA\Property(property="token", type="string", example="token_de_reinitialisation"),
+     *             @OA\Property(property="email", type="string", format="email", example="user@example.com"),
+     *             @OA\Property(property="password", type="string", format="password", example="nouveau_password"),
+     *             @OA\Property(property="password_confirmation", type="string", format="password", example="nouveau_password")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Mot de passe réinitialisé avec succès"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Erreur de validation ou token invalide"
+     *     )
+     * )
+     */
     public function resetMps(Request $request)
     {
         $request->validate([
@@ -113,22 +225,49 @@ class AuthController extends Controller
             'message' => 'Impossible de réinitialiser le mot de passe. Veuillez vérifier vos informations.'
         ], 422);
     }
-    // fonction pour changer le mot de passe
+
+    /**
+     * @OA\Post(
+     *     path="/api/change-password",
+     *     summary="Changement de mot de passe",
+     *     tags={"Authentification"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"current_password","password","password_confirmation"},
+     *             @OA\Property(property="current_password", type="string", format="password", example="ancien_password"),
+     *             @OA\Property(property="password", type="string", format="password", example="nouveau_password"),
+     *             @OA\Property(property="password_confirmation", type="string", format="password", example="nouveau_password")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Mot de passe changé avec succès"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Erreur de validation"
+     *     )
+     * )
+     */
     public function changeMps(Request $request){
         $request->validate([
-            'password'=>'required|string|min:8|confirmed',
+            'current_password' => ['required', 'current_password'],
+            'password' => ['required', 'confirmed', PasswordRule::defaults()],
         ]);
+        
         $user = Auth::user();
         $user->forceFill([
-            'password'=>Hash::make($request->password),
-            'remember_token'=>Str::random(60),
-        ])->setRememberToken(Str::random(60));
-        $user->save();
+            'password' => Hash::make($request->password),
+            'remember_token' => Str::random(60),
+        ])->save();
+        
         event(new PasswordReset($user));
+        
         return response()->json([
-            'status' => 'Mot de passe reinitialise avec succes'
+            'status' => 'success',
+            'message' => 'Mot de passe modifié avec succès'
         ]);
     }
-    
-
 }

@@ -3,6 +3,9 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\SalleController;
+use App\Http\Controllers\API\ReservationController;
+use App\Http\Controllers\API\DisponibiliteController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,4 +30,7 @@ Route::post('/reset-password', [AuthController::class, 'resetMps'])->name('passw
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class,'logout']);
     Route::post('/change-password', [AuthController::class,'changeMps']);
+    Route::apiResource('salles', SalleController::class);
+    Route::apiResource('reservations', ReservationController::class);
+    Route::apiResource('disponibilites', DisponibiliteController::class);
 });

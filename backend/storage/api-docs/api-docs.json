@@ -1,0 +1,1003 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "API LiqaaSpace",
+        "description": "Documentation de l'API LiqaaSpace",
+        "contact": {
+            "name": "Équipe LiqaaSpace",
+            "email": "contact@liqaaspace.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://127.0.0.1:8000",
+            "description": "API Server"
+        }
+    ],
+    "paths": {
+        "/api/register": {
+            "post": {
+                "tags": [
+                    "Authentification"
+                ],
+                "summary": "Enregistrement d'un nouvel utilisateur",
+                "operationId": "a718f172ff3ac464d723835815f8fb57",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation",
+                                    "role"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password"
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "enum": [
+                                            "admin",
+                                            "collaborateur",
+                                            "responsable"
+                                        ],
+                                        "example": "collaborateur"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Utilisateur enregistré avec succès"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                }
+            }
+        },
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Authentification"
+                ],
+                "summary": "Connexion d'un utilisateur",
+                "operationId": "44212a9096e4b09358281e9ec8a0701d",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Connexion réussie"
+                    },
+                    "401": {
+                        "description": "Identifiants invalides"
+                    }
+                }
+            }
+        },
+        "/api/logout": {
+            "post": {
+                "tags": [
+                    "Authentification"
+                ],
+                "summary": "Déconnexion de l'utilisateur",
+                "operationId": "79854151e609bd20032aa5aa4d5a35c0",
+                "responses": {
+                    "200": {
+                        "description": "Déconnexion réussie"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/forgot-password": {
+            "post": {
+                "tags": [
+                    "Authentification"
+                ],
+                "summary": "Demande de réinitialisation de mot de passe",
+                "operationId": "3dbb204db612b854bff4583df845eeec",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Lien de réinitialisation envoyé"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                }
+            }
+        },
+        "/api/reset-password": {
+            "post": {
+                "tags": [
+                    "Authentification"
+                ],
+                "summary": "Réinitialisation du mot de passe",
+                "operationId": "7e039db2b2b30ba096dbacd19e2f9517",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "token",
+                                    "email",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "token": {
+                                        "type": "string",
+                                        "example": "token_de_reinitialisation"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "nouveau_password"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "nouveau_password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Mot de passe réinitialisé avec succès"
+                    },
+                    "422": {
+                        "description": "Erreur de validation ou token invalide"
+                    }
+                }
+            }
+        },
+        "/api/change-password": {
+            "post": {
+                "tags": [
+                    "Authentification"
+                ],
+                "summary": "Changement de mot de passe",
+                "operationId": "b137a5fd45ffe78cadb29f23881a5216",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "current_password",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "current_password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "ancien_password"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "nouveau_password"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "nouveau_password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Mot de passe changé avec succès"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/disponibilites": {
+            "get": {
+                "tags": [
+                    "Disponibilités"
+                ],
+                "summary": "Liste toutes les disponibilités",
+                "operationId": "c955c9d7a1d13248ecd6274cb2db3a70",
+                "responses": {
+                    "200": {
+                        "description": "Liste des disponibilités récupérée avec succès"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Disponibilités"
+                ],
+                "summary": "Créer une nouvelle disponibilité",
+                "operationId": "57706ec08f0d0d4d9b76e3b3239b38cf",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "salle_id",
+                                    "date",
+                                    "heure_debut",
+                                    "heure_fin",
+                                    "statut"
+                                ],
+                                "properties": {
+                                    "salle_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-05-22"
+                                    },
+                                    "heure_debut": {
+                                        "type": "string",
+                                        "format": "time",
+                                        "example": "09:00"
+                                    },
+                                    "heure_fin": {
+                                        "type": "string",
+                                        "format": "time",
+                                        "example": "17:00"
+                                    },
+                                    "statut": {
+                                        "type": "string",
+                                        "enum": [
+                                            "disponible",
+                                            "occupé"
+                                        ],
+                                        "example": "disponible"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Disponibilité créée avec succès"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                }
+            }
+        },
+        "/api/disponibilites/{id}": {
+            "get": {
+                "tags": [
+                    "Disponibilités"
+                ],
+                "summary": "Afficher une disponibilité spécifique",
+                "operationId": "d7c727bdf060029ca1e4f93c6d42f2cd",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la disponibilité",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Disponibilité récupérée avec succès"
+                    },
+                    "404": {
+                        "description": "Disponibilité non trouvée"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Disponibilités"
+                ],
+                "summary": "Mettre à jour une disponibilité",
+                "operationId": "0ea006c3eec361bf1eda27c4f246d8ca",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la disponibilité à mettre à jour",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "salle_id",
+                                    "date",
+                                    "heure_debut",
+                                    "heure_fin",
+                                    "statut"
+                                ],
+                                "properties": {
+                                    "salle_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-05-22"
+                                    },
+                                    "heure_debut": {
+                                        "type": "string",
+                                        "format": "time",
+                                        "example": "09:00"
+                                    },
+                                    "heure_fin": {
+                                        "type": "string",
+                                        "format": "time",
+                                        "example": "17:00"
+                                    },
+                                    "statut": {
+                                        "type": "string",
+                                        "enum": [
+                                            "disponible",
+                                            "occupé"
+                                        ],
+                                        "example": "occupé"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Disponibilité mise à jour avec succès"
+                    },
+                    "404": {
+                        "description": "Disponibilité non trouvée"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Disponibilités"
+                ],
+                "summary": "Supprimer une disponibilité",
+                "operationId": "1363809bbd9388368b28ffe0b1f6d210",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la disponibilité à supprimer",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Disponibilité supprimée avec succès"
+                    },
+                    "404": {
+                        "description": "Disponibilité non trouvée"
+                    }
+                }
+            }
+        },
+        "/api/reservations": {
+            "get": {
+                "tags": [
+                    "Réservations"
+                ],
+                "summary": "Liste toutes les réservations",
+                "operationId": "26909e6f6eb4a49ab5428889a7ff1067",
+                "responses": {
+                    "200": {
+                        "description": "Liste des réservations récupérée avec succès"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Réservations"
+                ],
+                "summary": "Créer une nouvelle réservation",
+                "operationId": "b1466042c18abd23d64464649f2442c3",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "salle_id",
+                                    "user_id",
+                                    "date_debut",
+                                    "date_fin",
+                                    "statut"
+                                ],
+                                "properties": {
+                                    "salle_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "user_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "date_debut": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2025-05-22 10:00:00"
+                                    },
+                                    "date_fin": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2025-05-22 12:00:00"
+                                    },
+                                    "statut": {
+                                        "type": "string",
+                                        "enum": [
+                                            "confirmé",
+                                            "annulé"
+                                        ],
+                                        "example": "confirmé"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Réservation créée avec succès"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                }
+            }
+        },
+        "/api/reservations/{id}": {
+            "get": {
+                "tags": [
+                    "Réservations"
+                ],
+                "summary": "Afficher une réservation spécifique",
+                "operationId": "f896182177203ee52325e4cbee5a7c7f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la réservation",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Réservation récupérée avec succès"
+                    },
+                    "404": {
+                        "description": "Réservation non trouvée"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Réservations"
+                ],
+                "summary": "Mettre à jour une réservation",
+                "operationId": "1564fc30d0991a49c920d815c32c8a61",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la réservation à mettre à jour",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "salle_id",
+                                    "user_id",
+                                    "date_debut",
+                                    "date_fin",
+                                    "statut"
+                                ],
+                                "properties": {
+                                    "salle_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "user_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "date_debut": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2025-05-22 10:00:00"
+                                    },
+                                    "date_fin": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2025-05-22 12:00:00"
+                                    },
+                                    "statut": {
+                                        "type": "string",
+                                        "enum": [
+                                            "confirmé",
+                                            "annulé"
+                                        ],
+                                        "example": "confirmé"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Réservation mise à jour avec succès"
+                    },
+                    "404": {
+                        "description": "Réservation non trouvée"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Réservations"
+                ],
+                "summary": "Supprimer une réservation",
+                "operationId": "c46682105a40a6b2324956601b05bbf4",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la réservation à supprimer",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Réservation supprimée avec succès"
+                    },
+                    "404": {
+                        "description": "Réservation non trouvée"
+                    }
+                }
+            }
+        },
+        "/api/salles": {
+            "get": {
+                "tags": [
+                    "Salles"
+                ],
+                "summary": "Liste toutes les salles",
+                "operationId": "4bcbc5cae51f9a46f269de9c3a5d2a84",
+                "responses": {
+                    "200": {
+                        "description": "Liste des salles récupérée avec succès"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Salles"
+                ],
+                "summary": "Créer une nouvelle salle",
+                "operationId": "beb6d7634c2b595aca41e8867c72adb1",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "nom",
+                                    "description",
+                                    "responsable_id",
+                                    "location",
+                                    "capacite",
+                                    "status"
+                                ],
+                                "properties": {
+                                    "nom": {
+                                        "type": "string",
+                                        "example": "Salle de conférence A"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Grande salle équipée d'un vidéoprojecteur"
+                                    },
+                                    "images[]": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
+                                    },
+                                    "responsable_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "location": {
+                                        "type": "string",
+                                        "example": "Bâtiment A, 1er étage"
+                                    },
+                                    "capacite": {
+                                        "type": "integer",
+                                        "example": 50
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "active",
+                                            "inactive"
+                                        ],
+                                        "example": "active"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Salle créée avec succès"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                }
+            }
+        },
+        "/api/salles/{id}": {
+            "get": {
+                "tags": [
+                    "Salles"
+                ],
+                "summary": "Afficher une salle spécifique",
+                "operationId": "e9c6c8bc56d7ea04d6e2f926a6280550",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la salle",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Salle récupérée avec succès"
+                    },
+                    "404": {
+                        "description": "Salle non trouvée"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Salles"
+                ],
+                "summary": "Mettre à jour une salle",
+                "operationId": "c92718071b3e8c9158972bf83c64b0e0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la salle à mettre à jour",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nom",
+                                    "description",
+                                    "responsable_id",
+                                    "location",
+                                    "capacite",
+                                    "status"
+                                ],
+                                "properties": {
+                                    "nom": {
+                                        "type": "string",
+                                        "example": "Salle de conférence A"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Grande salle équipée d'un vidéoprojecteur"
+                                    },
+                                    "images": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "example": "salles/image.jpg"
+                                        }
+                                    },
+                                    "responsable_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "location": {
+                                        "type": "string",
+                                        "example": "Bâtiment A, 1er étage"
+                                    },
+                                    "capacite": {
+                                        "type": "integer",
+                                        "example": 50
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "active",
+                                            "inactive"
+                                        ],
+                                        "example": "active"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Salle mise à jour avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Salle"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Salle non trouvée"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Salles"
+                ],
+                "summary": "Supprimer une salle",
+                "operationId": "0481df89b8e42e4e348bb6aa1bcc7aae",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la salle à supprimer",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Salle supprimée avec succès"
+                    },
+                    "404": {
+                        "description": "Salle non trouvée"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Salle": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "nom": {
+                        "type": "string",
+                        "example": "Salle de conférence A"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Description de la salle"
+                    },
+                    "images": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "responsable_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "location": {
+                        "type": "string",
+                        "example": "Bâtiment A, 1er étage"
+                    },
+                    "capacite": {
+                        "type": "integer",
+                        "example": 50
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "active",
+                            "inactive"
+                        ],
+                        "example": "active"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Authentification",
+            "description": "Authentification des utilisateurs"
+        },
+        {
+            "name": "Disponibilités",
+            "description": "API Endpoints de gestion des disponibilités des salles"
+        },
+        {
+            "name": "Réservations",
+            "description": "Opérations sur les réservations"
+        },
+        {
+            "name": "Salles",
+            "description": "Opérations sur les salles"
+        }
+    ]
+}

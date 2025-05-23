@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('disponibilites', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('salle_id')->constrained('salles')->onDelete('cascade');
+            $table->date('date');
+            $table->time('heure_debut');
+            $table->time('heure_fin');
+            $table->enum('statut', ['disponible', 'reservee'])->default('disponible');
             $table->timestamps();
         });
     }

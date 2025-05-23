@@ -4,11 +4,26 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Reservation;
 
+/**
+ * @OA\Tag(
+ *     name="Réservations",
+ *     description="API Endpoints de gestion des réservations"
+ * )
+ */
 class ReservationController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * @OA\Get(
+     *     path="/api/reservations",
+     *     summary="Liste toutes les réservations",
+     *     tags={"Réservations"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Liste des réservations récupérée avec succès"
+     *     )
+     * )
      */
     public function index()
     {
@@ -17,7 +32,30 @@ class ReservationController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * @OA\Post(
+     *     path="/api/reservations",
+     *     summary="Créer une nouvelle réservation",
+     *     tags={"Réservations"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"salle_id","user_id","date_debut","date_fin","statut"},
+     *             @OA\Property(property="salle_id", type="integer", example=1),
+     *             @OA\Property(property="user_id", type="integer", example=1),
+     *             @OA\Property(property="date_debut", type="string", format="date-time", example="2025-05-22 10:00:00"),
+     *             @OA\Property(property="date_fin", type="string", format="date-time", example="2025-05-22 12:00:00"),
+     *             @OA\Property(property="statut", type="string", enum={"confirmé","annulé"}, example="confirmé")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Réservation créée avec succès"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Erreur de validation"
+     *     )
+     * )
      */
     public function store(Request $request)
     {
@@ -36,7 +74,26 @@ class ReservationController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * @OA\Get(
+     *     path="/api/reservations/{id}",
+     *     summary="Afficher une réservation spécifique",
+     *     tags={"Réservations"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID de la réservation",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Réservation récupérée avec succès"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Réservation non trouvée"
+     *     )
+     * )
      */
     public function show(string $id)
     {
@@ -48,7 +105,41 @@ class ReservationController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * @OA\Put(
+     *     path="/api/reservations/{id}",
+     *     summary="Mettre à jour une réservation",
+     *     tags={"Réservations"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID de la réservation à mettre à jour",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"salle_id","user_id","date_debut","date_fin","statut"},
+     *             @OA\Property(property="salle_id", type="integer", example=1),
+     *             @OA\Property(property="user_id", type="integer", example=1),
+     *             @OA\Property(property="date_debut", type="string", format="date-time", example="2025-05-22 10:00:00"),
+     *             @OA\Property(property="date_fin", type="string", format="date-time", example="2025-05-22 12:00:00"),
+     *             @OA\Property(property="statut", type="string", enum={"confirmé","annulé"}, example="confirmé")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Réservation mise à jour avec succès"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Réservation non trouvée"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Erreur de validation"
+     *     )
+     * )
      */
     public function update(Request $request, string $id)
     {
@@ -68,7 +159,26 @@ class ReservationController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * @OA\Delete(
+     *     path="/api/reservations/{id}",
+     *     summary="Supprimer une réservation",
+     *     tags={"Réservations"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID de la réservation à supprimer",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Réservation supprimée avec succès"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Réservation non trouvée"
+     *     )
+     * )
      */
     public function destroy(string $id)
     {
