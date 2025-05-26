@@ -2,13 +2,13 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Layout from './components/layout/Layout';
 import AuthPage from './components/auth/AuthPage';
 import Dashboard from './pages/Home';
 import Salles from './pages/Salles';
 import NotFound from './pages/NotFound';
-import { useAuth } from './contexts/AuthContext';
+import TestConnexion from './components/test';
 
 const theme = createTheme({
   palette: {
@@ -18,7 +18,7 @@ const theme = createTheme({
   }
 });
 
-// Créez un composant séparé pour les routes protégées
+// Composant pour les routes protégées
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
   const location = useLocation();
@@ -34,12 +34,30 @@ function ProtectedRoute({ children }) {
   return children;
 }
 
-// Créez un composant séparé pour les routes de l'application
+// Composant pour les routes publiques
+function PublicRoute({ children }) {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <div>Chargement...</div>;
+  }
+
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
+}
+
 function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      <Route path="/auth" element={<AuthPage />} />
+      <Route path="/auth" element={
+        <PublicRoute>
+          <AuthPage />
+        </PublicRoute>
+      } />
       
       <Route element={<Layout />}>
         <Route path="/dashboard" element={
@@ -52,6 +70,8 @@ function AppRoutes() {
             <Salles />
           </ProtectedRoute>
         } />
+        <Route path="/test" element={<TestConnexion />} />
+        {/* Ajoutez d'autres routes protégées ici */}
       </Route>
       
       <Route path="*" element={<NotFound />} />
@@ -63,12 +83,13 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Router>
-        <AuthProvider>
+      <AuthProvider>
+        <Router>
           <AppRoutes />
-        </AuthProvider>
-      </Router>
+        </Router>
+      </AuthProvider>
     </ThemeProvider>
+    
   );
 }
 

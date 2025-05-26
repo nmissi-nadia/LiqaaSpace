@@ -15,20 +15,14 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
-
+    'paths' => ['api/*', 'sanctum/csrf-cookie', 'login', 'logout'],
     'allowed_methods' => ['*'],
-
-    'allowed_origins' => ['http://localhost:3000'],
-
-    'allowed_origins_patterns' => [],
-
+    'allowed_origins' => ['http://localhost:3000'], // Port de votre frontend React
     'allowed_headers' => ['*'],
-
-    'exposed_headers' => [],
-
+    'allowed_origins_patterns' => [],
+    'exposed_headers' => ['X-XSRF-TOKEN'],
     'max_age' => 0,
-
     'supports_credentials' => true,
-
+    
+    
 ];

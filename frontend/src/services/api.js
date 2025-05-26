@@ -1,26 +1,40 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api',
+  baseURL: 'http://localhost:8000',
+  withCredentials: true,
   headers: {
-    'Content-Type': 'application/json',
     'Accept': 'application/json',
+    'Content-Type': 'application/json',
     'X-Requested-With': 'XMLHttpRequest'
-  },
-  withCredentials: true 
+  }
 });
 
+// Intercepteur pour gérer le CSRF
 api.interceptors.request.use(
   async (config) => {
-    if (['post', 'put', 'delete'].includes(config.method)) {
-      try {
-        await axios.get('http://localhost:8000/sanctum/csrf-cookie', {
-          withCredentials: true
-        });
-      } catch (error) {
-        console.error('Erreur lors de la récupération du token CSRF', error);
-      }
+    // Ne pas ajouter le header pour la requête CSRF
+    if (config.url.includes('sanctum/csrf-cookie')) {
+      return config;
     }
+    
+    // Vérifier si on a déjà un token CSRF
+    if (!document.cookie.includes('XSRF-TOKEN')) {
+      await axios.get('http://localhost:8000/sanctum/csrf-cookie', {
+        withCredentials: true
+      });
+    }
+    
+    // Récupérer le token CSRF depuis les cookies
+    const xsrfToken = document.cookie
+      .split('; ')
+      .find(row => row.startsWith('XSRF-TOKEN='))
+      ?.split('=')[1];
+    
+    if (xsrfToken) {
+      config.headers['X-XSRF-TOKEN'] = decodeURIComponent(xsrfToken);
+    }
+    
     return config;
   },
   (error) => {

@@ -1,8 +1,11 @@
-// LoginForm.jsx
-import React from 'react';
-import { TextField, Button, Box, Typography, Link } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import { useSnackbar } from 'notistack'; // Si vous utilisez notistack pour les notifications
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import { Box, TextField, Button, Link } from '@mui/material';
+import api from '../../services/api';
+
 
 const validationSchema = Yup.object({
   email: Yup.string().email('Email invalide').required('Champ requis'),
@@ -10,17 +13,57 @@ const validationSchema = Yup.object({
 });
 
 const LoginForm = () => {
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const showMessage = (message, type = 'info') => {
+    console.log(`${type}: ${message}`);
+    // Optionnel: utilisez alert() ou une autre méthode de notification
+    alert(message);
+  };
   const formik = useFormik({
     initialValues: {
       email: '',
       password: '',
     },
     validationSchema,
-    onSubmit: (values) => {
-      console.log('Login values:', values);
-      // Ici, vous ajouterez la logique de connexion
+    onSubmit: async (values, { setSubmitting, setFieldError }) => {
+      try {
+        const success = await login(values.email, values.password);
+        console.log('Connexion réussie:', success);
+        
+        if (success) {
+          // Redirection après connexion réussie
+          navigate('/dashboard'); // ou la route de votre choix
+          showMessage('Connexion réussie !', 'success'); // Optionnel
+        } else {
+          // Gestion des erreurs (sera géré par le catch)
+          throw new Error('Échec de la connexion');
+        }
+      } catch (error) {
+        console.error('Erreur complète:', {
+          error,
+          response: error.response,
+          request: error.request,
+          config: error.config
+        });
+        
+        if (error.response?.data?.errors) {
+          Object.entries(error.response.data.errors).forEach(([field, messages]) => {
+            setFieldError(field, messages[0]);
+          });
+        } else {
+          const errorMessage = error.response?.data?.message 
+            ? `Erreur serveur: ${error.response.data.message}`
+            : 'Impossible de se connecter au serveur. Vérifiez votre connexion.';
+          
+          showMessage(errorMessage, 'error');
+        }
+      } finally {
+        setSubmitting(false);
+      }
     },
   });
+
 
   return (
     <Box component="form" onSubmit={formik.handleSubmit} sx={{ mt: 2 }}>
