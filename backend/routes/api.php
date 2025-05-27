@@ -19,7 +19,7 @@ use App\Http\Controllers\API\UserController;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+Route::middleware('auth:sanctum')->get('/users', function (Request $request) {
     return $request->user();
 });
 Route::get('/sanctum/csrf-cookie', function () {

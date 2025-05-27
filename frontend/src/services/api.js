@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:8000',
+  baseURL: 'http://localhost:8000/api',
   withCredentials: true,
   headers: {
     'Accept': 'application/json',
@@ -38,6 +38,20 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Gestion des erreurs
+api.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response?.status === 401 || error.response?.status === 419) {
+      // Rediriger vers la page de connexion si non authentifié
+      if (window.location.pathname !== '/dashboard') {
+        window.location.href = '/dashboard';
+      }
+    }
     return Promise.reject(error);
   }
 );

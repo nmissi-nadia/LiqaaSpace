@@ -15,8 +15,6 @@ import {
   DialogTitle,
   DialogContent,
   CircularProgress,
-  Snackbar,
-  Alert
 } from '@mui/material';
 import { Add, Edit, Delete } from '@mui/icons-material';
 import SalleForm from '../components/salles/SalleForm';
@@ -27,11 +25,6 @@ const Salles = () => {
   const [open, setOpen] = useState(false);
   const [editingSalle, setEditingSalle] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: '',
-    severity: 'success'
-  });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -45,7 +38,6 @@ const Salles = () => {
       setSalles(data);
     } catch (error) {
       console.error('Erreur lors du chargement des salles:', error);
-      showSnackbar('Erreur lors du chargement des salles', 'error');
     } finally {
       setLoading(false);
     }
@@ -62,6 +54,7 @@ const Salles = () => {
   };
 
   const handleSubmit = async (formData) => {
+    
     try {
       if (editingSalle) {
         await api.put(`/salles/${editingSalle.id}`, formData, {
@@ -69,20 +62,21 @@ const Salles = () => {
             'Content-Type': 'multipart/form-data',
           },
         });
-        showSnackbar('Salle mise à jour avec succès', 'success');
+        console.log('Salle mise à jour avec succès');
       } else {
+        console.log(formData);
         await api.post('/salles', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
         });
-        showSnackbar('Salle créée avec succès', 'success');
+        console.log('Salle créée avec succès');
       }
       handleClose();
       fetchSalles();
     } catch (error) {
       console.error('Erreur lors de la sauvegarde:', error);
-      showSnackbar(error.response?.data?.message || 'Une erreur est survenue', 'error');
+      console.error(error.response?.data?.message || 'Une erreur est survenue', 'error');
     }
   };
 
@@ -90,22 +84,16 @@ const Salles = () => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer cette salle ?')) {
       try {
         await api.delete(`/salles/${id}`);
-        showSnackbar('Salle supprimée avec succès', 'success');
+        console.log('Salle supprimée avec succès');
         fetchSalles();
       } catch (error) {
         console.error('Erreur lors de la suppression:', error);
-        showSnackbar('Erreur lors de la suppression de la salle', 'error');
+        console.error('Erreur lors de la suppression de la salle', 'error');
       }
     }
   };
 
-  const showSnackbar = (message, severity = 'success') => {
-    setSnackbar({ open: true, message, severity });
-  };
-
-  const handleSnackbarClose = () => {
-    setSnackbar(prev => ({ ...prev, open: false }));
-  };
+  
 
   if (loading && salles.length === 0) {
     return (
@@ -139,7 +127,7 @@ const Salles = () => {
                 <CardMedia
                   component="img"
                   height="200"
-                  image={`http://127.0.0.1:8000/storage/${salle.images[0]}`}
+                  image={`http://127.0.0.1:8000/storage/salles/${salle.images[0]}`}
                   alt={salle.nom}
                 />
               )}
@@ -203,20 +191,7 @@ const Salles = () => {
         </DialogContent>
       </Dialog>
 
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-      >
-        <Alert 
-          onClose={handleSnackbarClose} 
-          severity={snackbar.severity}
-          sx={{ width: '100%' }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
+      
     </Container>
   );
 };

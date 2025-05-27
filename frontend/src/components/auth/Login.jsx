@@ -17,8 +17,7 @@ const LoginForm = () => {
   const navigate = useNavigate();
   const showMessage = (message, type = 'info') => {
     console.log(`${type}: ${message}`);
-    // Optionnel: utilisez alert() ou une autre méthode de notification
-    alert(message);
+
   };
   const formik = useFormik({
     initialValues: {
@@ -34,7 +33,7 @@ const LoginForm = () => {
         if (success) {
           // Redirection après connexion réussie
           navigate('/dashboard'); // ou la route de votre choix
-          showMessage('Connexion réussie !', 'success'); // Optionnel
+          showMessage('Connexion réussie !', 'success'); 
         } else {
           // Gestion des erreurs (sera géré par le catch)
           throw new Error('Échec de la connexion');

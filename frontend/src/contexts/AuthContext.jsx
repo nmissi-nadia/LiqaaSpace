@@ -9,10 +9,7 @@ axios.defaults.baseURL = 'http://localhost:8000'; // adapte à ton backend
 
 export const register = async (data) => {
   try {
-    // 1. Appel à /sanctum/csrf-cookie pour récupérer le cookie XSRF-TOKEN
     await axios.get('/sanctum/csrf-cookie');
-
-    // 2. Appel réel à l’API d’inscription
     await axios.post('/api/register', data);
 
     return true;
@@ -50,10 +47,10 @@ export const AuthProvider = ({ children }) => {
       console.log('Réponse de connexion:', loginResponse.data);
       
       console.log('Récupération des informations utilisateur...');
-      const userResponse = await api.get('/user');
+      const userResponse = await api.get('/users');
       console.log('Utilisateur connecté:', userResponse.data);
-      
-      setUser(userResponse.data);
+      const userData = Array.isArray(userResponse.data) ? userResponse.data[0] : userResponse.data;
+setUser(userData);
       return true;
       
     } catch (error) {
@@ -78,7 +75,7 @@ export const AuthProvider = ({ children }) => {
   
       console.log('Début de linscription...');
   
-      const response = await api.post('/api/register', {
+      const response = await api.post('/register', {
         name: userData.name.trim(),
         email: userData.email.trim(),
         password: userData.password,
@@ -88,12 +85,12 @@ export const AuthProvider = ({ children }) => {
   
       console.log('Inscription réussie:', response.data);
       
-      await api.post('/api/login', {
+      await api.post('/login', {
         email: userData.email,
         password: userData.password
       });
   
-      const userResponse = await api.get('/api/user');
+      const userResponse = await api.get('/users');
       setUser(userResponse.data);
   
       return true;

@@ -1,7 +1,18 @@
 import { Outlet, Link } from 'react-router-dom';
 import { Box, AppBar, Toolbar, Typography, Button, Container } from '@mui/material';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Layout = () => {
+  const { user, logout } = useAuth();
+  
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error);
+    }
+  };
+
   return (
     <Box sx={{ 
       display: 'flex', 
@@ -31,19 +42,34 @@ const Layout = () => {
           >
             Salles
           </Button>
-          <Button 
-            color="inherit" 
-            component={Link} 
-            to="/login"
-            sx={{ 
-              color: '#aeac9a',
-              '&:hover': {
-                backgroundColor: 'rgba(255, 255, 255, 0.1)'
-              }
-            }}
-          >
-            Connexion
-          </Button>
+          {user ? (
+            <Button 
+              color="inherit" 
+              onClick={handleLogout}
+              sx={{ 
+                color: '#aeac9a',
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                }
+              }}
+            >
+              Déconnexion
+            </Button>
+          ) : (
+            <Button 
+              color="inherit" 
+              component={Link} 
+              to="/login"
+              sx={{ 
+                color: '#aeac9a',
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                }
+              }}
+            >
+              Connexion
+            </Button>
+          )}
         </Toolbar>
       </AppBar>
 
