@@ -1,85 +1,71 @@
-import React from 'react';
-import { 
-  Container, 
-  Typography, 
-  Grid, 
-  Card, 
-  CardContent, 
-  Button 
-} from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import PeopleIcon from '@mui/icons-material/People';
-import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
-import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import { Grid, Paper, Typography, Box } from '@mui/material';
+import {
+  People as PeopleIcon,
+  MeetingRoom as RoomIcon,
+  Event as EventIcon,
+  BarChart as StatsIcon
+} from '@mui/icons-material';
+import { Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
+
+const StatCard = ({ title, value, icon: Icon, color = 'primary' }) => (
+  <Grid item xs={12} sm={6} md={3}>
+    <Paper elevation={3} sx={{ p: 2, display: 'flex', alignItems: 'center' }}>
+      <Box sx={{ 
+        bgcolor: `${color}.light`, 
+        color: `${color}.contrastText`, 
+        p: 2, 
+        borderRadius: 1,
+        mr: 2
+      }}>
+        <Icon fontSize="large" />
+      </Box>
+      <Box>
+        <Typography variant="h6">{value}</Typography>
+        <Typography variant="body2" color="textSecondary">{title}</Typography>
+      </Box>
+    </Paper>
+  </Grid>
+);
 
 const AdminDashboard = () => {
-  const navigate = useNavigate();
+  const stats = [
+    { title: 'Utilisateurs', value: '156', icon: PeopleIcon, color: 'primary' },
+    { title: 'Salles', value: '24', icon: RoomIcon, color: 'secondary' },
+    { title: 'Réservations', value: '89', icon: EventIcon, color: 'success' },
+    { title: 'Taux occupation', value: '78%', icon: StatsIcon, color: 'warning' },
+  ];
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        Tableau de Bord Administrateur
-      </Typography>
-      
-      <Grid container spacing={3} sx={{ mt: 2 }}>
-        <Grid item xs={12} md={4}>
-          <Card sx={{ height: '100%' }}>
-            <CardContent>
-              <PeopleIcon color="primary" sx={{ fontSize: 40 }} />
-              <Typography variant="h6" gutterBottom>Gestion des Utilisateurs</Typography>
-              <Typography variant="body2" paragraph>
-                Gérez les comptes utilisateurs, les rôles et les permissions.
-              </Typography>
-              <Button 
-                variant="contained" 
-                color="primary"
-                onClick={() => navigate('/admin/utilisateurs')}
-              >
-                Accéder
-              </Button>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={4}>
-          <Card sx={{ height: '100%' }}>
-            <CardContent>
-              <MeetingRoomIcon color="secondary" sx={{ fontSize: 40 }} />
-              <Typography variant="h6" gutterBottom>Gestion des Salles</Typography>
-              <Typography variant="body2" paragraph>
-                Consultez et gérez toutes les salles de l'entreprise.
-              </Typography>
-              <Button 
-                variant="contained" 
-                color="secondary"
-                onClick={() => navigate('/salles')}
-              >
-                Voir les salles
-              </Button>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={4}>
-          <Card sx={{ height: '100%' }}>
-            <CardContent>
-              <EventAvailableIcon color="success" sx={{ fontSize: 40 }} />
-              <Typography variant="h6" gutterBottom>Réservations</Typography>
-              <Typography variant="body2" paragraph>
-                Visualisez et gérez toutes les réservations.
-              </Typography>
-              <Button 
-                variant="contained" 
-                color="success"
-                onClick={() => navigate('/reservations')}
-              >
-                Voir les réservations
-              </Button>
-            </CardContent>
-          </Card>
+    <Box>
+      <Typography variant="h4" gutterBottom>Tableau de bord</Typography>
+      <Grid container spacing={3}>
+        {stats.map((stat, index) => (
+          <StatCard key={index} {...stat} />
+        ))}
+        
+        {/* Dernières réservations */}
+        <Grid item xs={12}>
+          <Paper sx={{ p: 3, mt: 3 }}>
+            <Typography variant="h6" gutterBottom>Dernières réservations</Typography>
+            {/* Ici vous pouvez ajouter un composant de tableau ou de liste */}
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Nom</TableCell>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Rôle</TableCell>
+                  <TableCell>Statut</TableCell>
+                  <TableCell>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {/* Ici vous pouvez ajouter des lignes de données */}
+              </TableBody>
+            </Table>
+          </Paper>
         </Grid>
       </Grid>
-    </Container>
+    </Box>
   );
 };
 

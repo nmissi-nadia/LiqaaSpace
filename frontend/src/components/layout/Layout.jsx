@@ -59,7 +59,7 @@ const Layout = () => {
             <Button 
               color="inherit" 
               component={Link} 
-              to="/login"
+              to="/auth"
               sx={{ 
                 color: '#aeac9a',
                 '&:hover': {

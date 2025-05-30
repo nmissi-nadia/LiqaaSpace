@@ -1,11 +1,11 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
 import axios from 'axios';
 const AuthContext = createContext({});
 
 export const useAuth = () => useContext(AuthContext);
 axios.defaults.withCredentials = true;
-axios.defaults.baseURL = 'http://localhost:8000'; // adapte à ton backend
+axios.defaults.baseURL = 'http://localhost:8000';
 
 export const register = async (data) => {
   try {
@@ -23,9 +23,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Vérifier l'état d'authentification au chargement
   
-
   const login = async (email, password) => {
     try {
       axios.defaults.withCredentials = true;
@@ -67,7 +65,6 @@ setUser(userData);
     }
   };
 
-  // Fonction d'inscription
   const register = async (userData) => {
     try {
       setLoading(true);

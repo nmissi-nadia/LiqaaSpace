@@ -47,7 +47,6 @@ api.interceptors.response.use(
   response => response,
   error => {
     if (error.response?.status === 401 || error.response?.status === 419) {
-      // Rediriger vers la page de connexion si non authentifié
       if (window.location.pathname !== '/dashboard') {
         window.location.href = '/dashboard';
       }

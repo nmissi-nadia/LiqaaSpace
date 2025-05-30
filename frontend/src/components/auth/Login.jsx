@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { useSnackbar } from 'notistack'; // Si vous utilisez notistack pour les notifications
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { Box, TextField, Button, Link } from '@mui/material';
@@ -31,11 +30,22 @@ const LoginForm = () => {
         console.log('Connexion réussie:', success);
         
         if (success) {
-          // Redirection après connexion réussie
-          navigate('/dashboard'); // ou la route de votre choix
-          showMessage('Connexion réussie !', 'success'); 
+          
+          const connecte = await api.get('/users');
+          console.log(connecte.data.role);
+      
+      switch(connecte.data.role) {
+        case 'admin':
+          navigate('/admin/dashboard');
+          break;
+        case 'responsable':
+          navigate('/responsable/dashboard');
+          break;
+        case 'collaborateur':
+          navigate('/collaborateur/dashboard'); 
+        } 
+        showMessage('Connexion réussie !', 'success'); 
         } else {
-          // Gestion des erreurs (sera géré par le catch)
           throw new Error('Échec de la connexion');
         }
       } catch (error) {
