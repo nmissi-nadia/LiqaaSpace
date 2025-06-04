@@ -44,11 +44,7 @@ function App() {
             {/* Protected Admin Routes */}
             <Route 
               path="/admin/dashboard" 
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <AdminLayout />
-                </ProtectedRoute>
-              }
+              element={<AdminLayout />}
             >
               <Route index element={<AdminDashboard />} />
               <Route path="users" element={<UserManagement />} />
@@ -58,11 +54,7 @@ function App() {
             {/* Protected Responsable Routes */}
             <Route 
               path="/responsable" 
-              element={
-                <ProtectedRoute allowedRoles={['responsable']}>
-                  <ResponsableLayout />
-                </ProtectedRoute>
-              }
+              element={<ResponsableLayout />}
             >
               <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="dashboard" element={<ResponsableDashboard />} />
@@ -73,12 +65,9 @@ function App() {
             {/* Protected Collaborateur Routes */}
             <Route 
               path="/collaborateur" 
-              element={
-                <ProtectedRoute allowedRoles={['collaborateur']}>
-                  <Layout>
+              element={<Layout>
                     <CollaborateurDashboard />
                   </Layout>
-                </ProtectedRoute>
               } 
             />
 

@@ -17,6 +17,7 @@
     "axios": "^1.9.0",
     "date-fns": "^4.1.0",
     "formik": "^2.4.6",
+    "js-cookie": "^3.0.5",
     "lucide-react": "^0.511.0",
     "notistack": "^3.0.2",
     "react": "^19.1.0",
@@ -53,5 +54,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.4",
+    "tailwindcss": "^4.1.8"
   }
 }

@@ -35,7 +35,7 @@ const menuItems = [
   { text: 'Paramètres', icon: <SettingsIcon />, path: '/admin/settings' },
 ];
 
-const AdminLayout = () => {
+const AdminLayout = ({allowedRoles}) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();

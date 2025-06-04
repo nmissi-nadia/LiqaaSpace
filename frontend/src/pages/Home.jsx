@@ -141,9 +141,9 @@ const Home = () => {
               <a href="#features" className="text-gray-700 hover:text-teal-600 transition-colors">Fonctionnalités</a>
               <a href="#pricing" className="text-gray-700 hover:text-teal-600 transition-colors">Tarifs</a>
               <a href="#about" className="text-gray-700 hover:text-teal-600 transition-colors">À propos</a>
-              <button className="bg-gradient-to-r from-teal-600 to-teal-700 text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all">
+              <a href="/auth" className="bg-gradient-to-r from-teal-600 to-teal-700 text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all">
                 Connexion
-              </button>
+              </a>
             </div>
             
             <button 

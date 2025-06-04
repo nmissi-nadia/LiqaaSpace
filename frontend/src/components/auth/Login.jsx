@@ -31,7 +31,7 @@ const LoginForm = () => {
         
         if (success) {
           
-          const connecte = await api.get('/users');
+          const connecte = await api.get('/user');
           console.log(connecte.data.role);
       
       switch(connecte.data.role) {
@@ -43,6 +43,10 @@ const LoginForm = () => {
           break;
         case 'collaborateur':
           navigate('/collaborateur/dashboard'); 
+          break;
+        default:
+          navigate('/');
+          break;
         } 
         showMessage('Connexion réussie !', 'success'); 
         } else {

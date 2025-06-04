@@ -10,7 +10,7 @@ axios.defaults.baseURL = 'http://localhost:8000';
 export const register = async (data) => {
   try {
     await axios.get('/sanctum/csrf-cookie');
-    await axios.post('/api/register', data);
+    await axios.post('/register', data);
 
     return true;
   } catch (error) {
@@ -22,8 +22,26 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+ 
+ 
+  const checkAuth = useCallback(async () => {
+    try {
+      const response = await api.get('/user');
+      const userData = Array.isArray(response.data) ? response.data[0] : response.data;
+      setUser(userData);
+      setIsAuthenticated(true);
+    } catch (error) {
+      setUser(null); // si non connecté
+      setIsAuthenticated(false);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
 
-  
   const login = async (email, password) => {
     try {
       axios.defaults.withCredentials = true;
@@ -33,6 +51,7 @@ export const AuthProvider = ({ children }) => {
       
       console.log('Récupération du token CSRF...');
       const csrfResponse = await api.get('/sanctum/csrf-cookie');
+      window.localStorage.setItem('csrfToken', csrfResponse.data.csrfToken);
       console.log('CSRF token récupéré');
       
       console.log('Tentative de connexion...');
@@ -45,7 +64,7 @@ export const AuthProvider = ({ children }) => {
       console.log('Réponse de connexion:', loginResponse.data);
       
       console.log('Récupération des informations utilisateur...');
-      const userResponse = await api.get('/users');
+      const userResponse = await api.get('/user');
       console.log('Utilisateur connecté:', userResponse.data);
       const userData = Array.isArray(userResponse.data) ? userResponse.data[0] : userResponse.data;
 setUser(userData);
@@ -87,7 +106,7 @@ setUser(userData);
         password: userData.password
       });
   
-      const userResponse = await api.get('/users');
+      const userResponse = await api.get('/user');
       setUser(userResponse.data);
   
       return true;

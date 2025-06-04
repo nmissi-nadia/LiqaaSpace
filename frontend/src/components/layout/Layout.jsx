@@ -1,8 +1,8 @@
-import { Outlet, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Box, AppBar, Toolbar, Typography, Button, Container } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
 
-const Layout = () => {
+const Layout = ({ children }) => {
   const { user, logout } = useAuth();
   
   const handleLogout = async () => {
@@ -18,7 +18,7 @@ const Layout = () => {
       display: 'flex', 
       flexDirection: 'column', 
       minHeight: '100vh',
-      backgroundColor: '#aeac9a' 
+      backgroundColor: 'white' 
     }}>
       {/* En-tête */}
       <AppBar position="static" elevation={0}>
@@ -74,16 +74,11 @@ const Layout = () => {
       </AppBar>
 
       {/* Contenu principal */}
-      <Container component="main" sx={{ 
-        flexGrow: 1, 
-        py: 4,
-        backgroundColor: '#ffffff',
-        my: 2,
-        borderRadius: 1,
-        boxShadow: 1
-      }}>
-        <Outlet />
-      </Container>
+      
+      <main>
+        {children}  {/* C'est ici que le contenu de la page s'affichera */}
+      </main>
+      
 
       {/* Pied de page */}
       <Box component="footer" sx={{ 
