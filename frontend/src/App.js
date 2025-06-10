@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -16,7 +16,7 @@ import ReservationsManagement from './components/Responsable/ReservationsManagem
 import CollaborateurDashboard from './components/Collaborateur/Dashboard';
 import Salles from './pages/Salles';
 import NotFound from './pages/NotFound';
-import ProtectedRoute from './components/ProtectedRoute';
+import CollaborateurLayout from './components/Collaborateur/CollaborateurLayout';
 
 const theme = createTheme({
   palette: {
@@ -34,7 +34,6 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AuthProvider>
-        <Router>
           <Routes>
             {/* Public Routes */}
             <Route path="/auth" element={<AuthPage />} />
@@ -53,21 +52,20 @@ function App() {
 
             {/* Protected Responsable Routes */}
             <Route 
-              path="/responsable" 
+              path="/responsable/dashboard" 
               element={<ResponsableLayout />}
             >
-              <Route index element={<Navigate to="dashboard" replace />} />
-              <Route path="dashboard" element={<ResponsableDashboard />} />
+              <Route index element={<ResponsableDashboard />} />
               <Route path="salles" element={<SallesManagement />} />
               <Route path="reservations" element={<ReservationsManagement />} />
             </Route>
 
             {/* Protected Collaborateur Routes */}
             <Route 
-              path="/collaborateur" 
-              element={<Layout>
+              path="/collaborateur/dashboard" 
+              element={<CollaborateurLayout>
                     <CollaborateurDashboard />
-                  </Layout>
+                  </CollaborateurLayout>
               } 
             />
 
@@ -78,7 +76,6 @@ function App() {
             {/* 404 Not Found */}
             <Route path="*" element={<Layout><NotFound /></Layout>} />
           </Routes>
-        </Router>
       </AuthProvider>
     </ThemeProvider>
   );

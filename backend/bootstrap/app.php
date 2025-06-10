@@ -51,5 +51,19 @@ $app->singleton(
 | from the actual running of the application and sending responses.
 |
 */
+// Modifiez cette partie
+$app->afterResolving('middleware', function () use ($app) {
+    $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
+    $kernel->appendMiddlewareToGroup('web', \Illuminate\Session\Middleware\StartSession::class);
+    $kernel->appendMiddlewareToGroup('web', \Illuminate\View\Middleware\ShareErrorsFromSession::class);
+});
+
+$app->afterResolving('middleware', function () use ($app) {
+    $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
+    $kernel->validateCsrfTokens(except: [
+        'sanctum/csrf-cookie',
+        'api/*'
+    ]);
+});
 
 return $app;

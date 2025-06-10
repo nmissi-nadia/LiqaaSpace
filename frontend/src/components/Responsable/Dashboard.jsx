@@ -16,7 +16,7 @@ import {
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import api from '../../services/api';
 
-const data = api.get("/reservations").then(res => res.data);
+const data = api.get("api/reservations").then(res => res.data);
 
 const StatCard = ({ title, value, icon, color }) => (
   <Paper 

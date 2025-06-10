@@ -1,82 +1,69 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
-import axios from 'axios';
+
 const AuthContext = createContext({});
 
 export const useAuth = () => useContext(AuthContext);
-axios.defaults.withCredentials = true;
-axios.defaults.baseURL = 'http://localhost:8000';
 
-export const register = async (data) => {
-  try {
-    await axios.get('/sanctum/csrf-cookie');
-    await axios.post('/register', data);
-
-    return true;
-  } catch (error) {
-    console.error(error);
-    return false;
-  }
-};
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
- 
- 
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return localStorage.getItem('isAuthenticated') === 'true';
+  });
+
   const checkAuth = useCallback(async () => {
     try {
-      const response = await api.get('/user');
+      const response = await api.get('api/user');  
       const userData = Array.isArray(response.data) ? response.data[0] : response.data;
       setUser(userData);
       setIsAuthenticated(true);
+      localStorage.setItem('isAuthenticated', 'true');
+      return true;
     } catch (error) {
-      setUser(null); // si non connecté
+      console.error('Erreur de vérification d\'authentification:', error);
+      setUser(null);
       setIsAuthenticated(false);
+      localStorage.removeItem('isAuthenticated');
+      return false;
     } finally {
       setLoading(false);
     }
   }, []);
+
   useEffect(() => {
-    checkAuth();
+    const initializeAuth = async () => {
+      await checkAuth();
+    };
+    initializeAuth();
   }, [checkAuth]);
 
   const login = async (email, password) => {
     try {
-      axios.defaults.withCredentials = true;
-      console.log('Tentative de connexion avec:', { email });
       setLoading(true);
       setError(null);
       
-      console.log('Récupération du token CSRF...');
-      const csrfResponse = await api.get('/sanctum/csrf-cookie');
-      window.localStorage.setItem('csrfToken', csrfResponse.data.csrfToken);
-      console.log('CSRF token récupéré');
+      // Récupérer le token CSRF
+      await api.get('/sanctum/csrf-cookie');
       
-      console.log('Tentative de connexion...');
-      const loginResponse = await api.post('login', { email, password }, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        withCredentials: true
+      // Se connecter
+      await api.post('api/login', { 
+        email, 
+        password 
       });
-      console.log('Réponse de connexion:', loginResponse.data);
       
-      console.log('Récupération des informations utilisateur...');
-      const userResponse = await api.get('/user');
-      console.log('Utilisateur connecté:', userResponse.data);
+      // Récupérer les infos utilisateur
+      const userResponse = await api.get('api/user');  
       const userData = Array.isArray(userResponse.data) ? userResponse.data[0] : userResponse.data;
-setUser(userData);
-      return true;
       
+      setUser(userData);
+      setIsAuthenticated(true);
+      localStorage.setItem('isAuthenticated', 'true');
+      
+      return true;
     } catch (error) {
-      console.error('Erreur détaillée:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-        headers: error.response?.headers
-      });
+      console.error('Erreur de connexion:', error);
       setError(error.response?.data?.message || 'Échec de la connexion');
       return false;
     } finally {
@@ -88,76 +75,63 @@ setUser(userData);
     try {
       setLoading(true);
       setError(null);
-  
-      console.log('Début de linscription...');
-  
-      const response = await api.post('/register', {
+      
+      // S'inscrire
+      const response = await api.post('api/register', {
         name: userData.name.trim(),
         email: userData.email.trim(),
         password: userData.password,
         password_confirmation: userData.password_confirmation,
         role: userData.role || 'collaborateur'
       });
-  
-      console.log('Inscription réussie:', response.data);
       
-      await api.post('/login', {
+      // Se connecter automatiquement après l'inscription
+      await api.post('api/login', {
         email: userData.email,
         password: userData.password
       });
-  
-      const userResponse = await api.get('/user');
-      setUser(userResponse.data);
-  
-      return true;
-  
-    } catch (error) {
-      console.error('Erreur inscription:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status
-      });
       
-      if (error.response?.data?.errors) {
-        setError(error.response.data.errors);
-      } else {
-        setError({
-          general: error.response?.data?.message || 
-                 'Erreur lors de l\'inscription'
-        });
-      }
+      // Récupérer les infos utilisateur
+      const userResponse = await api.get('api/user'); 
+      setUser(userResponse.data);
+      
+      return true;
+    } catch (error) {
+      console.error('Erreur inscription:', error);
+      setError(error.response?.data?.message || 'Erreur lors de l\'inscription');
       return false;
     } finally {
       setLoading(false);
     }
   };
-  
 
-  // Fonction de déconnexion
   const logout = async () => {
     try {
-      await api.post('/logout');
+      await api.post('api/logout');
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error);
+    } finally {
       setUser(null);
-      return true;
-    } catch (err) {
-      console.error('Erreur de déconnexion:', err);
-      return false;
+      setIsAuthenticated(false);
+      localStorage.removeItem('isAuthenticated');
+      window.location.href = '/auth';
     }
   };
 
-  const value = {
-    user,
-    loading,
-    error,
-    login,
-    register,
-    logout,
-    isAuthenticated: !!user,
-  };
-
   return (
-    <AuthContext.Provider value={value}>
-      {!loading && children}
+    <AuthContext.Provider 
+      value={{
+        user,
+        loading,
+        error,
+        isAuthenticated,
+        login,
+        register,
+        logout,
+        checkAuth
+      }}
+    >
+      {children}
     </AuthContext.Provider>
   );
 };

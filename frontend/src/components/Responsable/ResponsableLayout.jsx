@@ -1,22 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { 
-  Box, 
-  Drawer, 
-  List, 
-  ListItem, 
-  ListItemIcon, 
-  ListItemText, 
-  AppBar, 
-  Toolbar, 
-  Typography, 
-  IconButton, 
-  useTheme, 
-  useMediaQuery,
-  Divider,
-  Avatar,
-  Tooltip
-} from '@mui/material';
 import {
   Menu as MenuIcon,
   Dashboard as DashboardIcon,
@@ -24,54 +7,40 @@ import {
   CalendarToday as ReservationIcon,
   Logout as LogoutIcon,
   ChevronLeft as ChevronLeftIcon,
-  ChevronRight as ChevronRightIcon
+  Close as CloseIcon
 } from '@mui/icons-material';
-import { styled } from '@mui/material/styles';
 import { useAuth } from '../../contexts/AuthContext';
 
-
-const drawerWidth = 240;
-
-const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
-  ({ theme, open }) => ({
-    flexGrow: 1,
-    padding: theme.spacing(3),
-    transition: theme.transitions.create('margin', {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-    marginLeft: `-${drawerWidth}px`,
-    ...(open && {
-      transition: theme.transitions.create('margin', {
-        easing: theme.transitions.easing.easeOut,
-        duration: theme.transitions.duration.enteringScreen,
-      }),
-      marginLeft: 0,
-    }),
-  }),
-);
-
-const DrawerHeader = styled('div')(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  padding: theme.spacing(0, 1),
-  ...theme.mixins.toolbar,
-  justifyContent: 'flex-end',
-}));
-
 const ResponsableLayout = () => {
-  const theme = useTheme();
   const { user, logout } = useAuth();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const [open, setOpen] = useState(!isMobile);
+  const [open, setOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const location = useLocation();
 
-  const handleDrawerOpen = () => {
-    setOpen(true);
+  // Détecter la taille de l'écran
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768);
+      if (window.innerWidth >= 768) {
+        setOpen(true);
+      } else {
+        setOpen(false);
+      }
+    };
+
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
+  const handleDrawerToggle = () => {
+    setOpen(!open);
   };
 
   const handleDrawerClose = () => {
-    setOpen(false);
+    if (isMobile) {
+      setOpen(false);
+    }
   };
 
   const menuItems = [
@@ -81,111 +50,112 @@ const ResponsableLayout = () => {
   ];
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            onClick={handleDrawerOpen}
-            edge="start"
-            sx={{ mr: 2, ...(open && { display: 'none' }) }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            Espace Responsable
-          </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Typography variant="subtitle2" sx={{ mr: 2 }}>
-              {user?.name || 'Responsable'}
-            </Typography>
-            <Tooltip title="Déconnexion">
-              <IconButton color="inherit" onClick={logout}>
-                <LogoutIcon />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        </Toolbar>
-      </AppBar>
-
-      <Drawer
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          '& .MuiDrawer-paper': {
-            width: drawerWidth,
-            boxSizing: 'border-box',
-          },
-        }}
-        variant={isMobile ? 'temporary' : 'persistent'}
-        anchor="left"
-        open={open}
-        onClose={handleDrawerClose}
-      >
-        <DrawerHeader>
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            width: '100%',
-            padding: theme.spacing(0, 2),
-          }}>
-            <Avatar 
-              src="/images/logo.png" 
-              alt="Logo" 
-              sx={{ 
-                width: 40, 
-                height: 40,
-                mr: 2,
-                bgcolor: theme.palette.primary.main
-              }} 
-            />
-            <Typography variant="h6" noWrap>
-              LiqaaSpace
-            </Typography>
-          </Box>
-          <IconButton onClick={handleDrawerClose}>
-            {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-          </IconButton>
-        </DrawerHeader>
-        <Divider />
-        
-        <List>
-          {menuItems.map((item) => (
-            <ListItem 
-              button 
-              key={item.text} 
-              component={Link} 
-              to={item.path}
-              selected={location.pathname === item.path}
-              onClick={isMobile ? handleDrawerClose : undefined}
-              sx={{
-                '&.Mui-selected': {
-                  backgroundColor: theme.palette.action.selected,
-                  borderRight: `4px solid ${theme.palette.primary.main}`,
-                },
-                '&:hover': {
-                  backgroundColor: theme.palette.action.hover,
-                },
-                mb: 0.5,
-              }}
+    <div className="flex min-h-screen bg-gray-50">
+      {/* AppBar/Header */}
+      <header className="fixed top-0 left-0 right-0 bg-blue-600 text-white shadow-lg z-50 h-16">
+        <div className="flex items-center justify-between h-full px-4">
+          <div className="flex items-center">
+            <button
+              onClick={handleDrawerToggle}
+              className={`p-2 rounded-md hover:bg-blue-700 transition-colors mr-3 ${
+                open && !isMobile ? 'hidden' : ''
+              }`}
+              aria-label="Toggle menu"
             >
-              <ListItemIcon sx={{ color: location.pathname === item.path ? 'primary.main' : 'inherit' }}>
-                {item.icon}
-              </ListItemIcon>
-              <ListItemText primary={item.text} />
-            </ListItem>
-          ))}
-        </List>
-      </Drawer>
+              <MenuIcon />
+            </button>
+            <h1 className="text-xl font-semibold">Espace Responsable</h1>
+          </div>
+          
+          <div className="flex items-center space-x-3">
+            <span className="text-sm font-medium hidden sm:block">
+              {user?.name || 'Responsable'}
+            </span>
+            <button
+              onClick={logout}
+              className="p-2 rounded-md hover:bg-blue-700 transition-colors"
+              title="Déconnexion"
+            >
+              <LogoutIcon />
+            </button>
+          </div>
+        </div>
+      </header>
 
-      <Main open={open}>
-        <DrawerHeader />
-        <Box sx={{ mt: 2 }}>
+      {/* Overlay pour mobile */}
+      {isMobile && open && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={handleDrawerClose}
+        />
+      )}
+
+      {/* Sidebar/Drawer */}
+      <aside
+        className={`
+          fixed top-0 left-0 h-full bg-white shadow-lg z-40 w-60 transform transition-transform duration-300 ease-in-out
+          ${open ? 'translate-x-0' : '-translate-x-full'}
+          ${!isMobile ? 'md:relative md:translate-x-0' : ''}
+        `}
+      >
+        {/* Header du drawer */}
+        <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+              L
+            </div>
+            <span className="text-lg font-semibold text-gray-800">LiqaaSpace</span>
+          </div>
+          <button
+            onClick={handleDrawerClose}
+            className="p-1 rounded-md hover:bg-gray-100 transition-colors md:hidden"
+          >
+            <CloseIcon />
+          </button>
+        </div>
+
+        {/* Menu items */}
+        <nav className="mt-4">
+          <ul className="space-y-1 px-3">
+            {menuItems.map((item) => {
+              const isActive = location.pathname === item.path;
+              return (
+                <li key={item.text}>
+                  <Link
+                    to={item.path}
+                    onClick={handleDrawerClose}
+                    className={`
+                      flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-200
+                      ${isActive 
+                        ? 'bg-blue-50 text-blue-700 border-r-4 border-blue-600 font-medium' 
+                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                      }
+                    `}
+                  >
+                    <span className={`text-xl ${isActive ? 'text-blue-600' : 'text-gray-500'}`}>
+                      {item.icon}
+                    </span>
+                    <span>{item.text}</span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+      </aside>
+
+      {/* Main content */}
+      <main 
+        className={`
+          flex-1 transition-all duration-300 ease-in-out pt-16
+          ${open && !isMobile ? 'md:ml-60' : 'ml-0'}
+        `}
+      >
+        <div className="p-6">
           <Outlet />
-        </Box>
-      </Main>
-    </Box>
+        </div>
+      </main>
+    </div>
   );
 };
 

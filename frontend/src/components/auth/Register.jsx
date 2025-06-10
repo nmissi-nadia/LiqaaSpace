@@ -74,7 +74,7 @@ function Register() {
 
     const success = await register(formData);
     if (success) {
-      navigate('/dashboard');
+      navigate('/');
     }
   };
 

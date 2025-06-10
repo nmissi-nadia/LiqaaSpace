@@ -2,9 +2,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { Box, TextField, Button, Link } from '@mui/material';
+import { Box, TextField, Button, Link, Alert } from '@mui/material';
 import api from '../../services/api';
-
 
 const validationSchema = Yup.object({
   email: Yup.string().email('Email invalide').required('Champ requis'),
@@ -14,10 +13,7 @@ const validationSchema = Yup.object({
 const LoginForm = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const showMessage = (message, type = 'info') => {
-    console.log(`${type}: ${message}`);
-
-  };
+  
   const formik = useFormik({
     initialValues: {
       email: '',
@@ -27,38 +23,32 @@ const LoginForm = () => {
     onSubmit: async (values, { setSubmitting, setFieldError }) => {
       try {
         const success = await login(values.email, values.password);
-        console.log('Connexion réussie:', success);
         
         if (success) {
+          // Récupérer le rôle de l'utilisateur
+          const userResponse = await api.get('api/user');  
+          const role = userResponse.data.role;
           
-          const connecte = await api.get('/user');
-          console.log(connecte.data.role);
-      
-      switch(connecte.data.role) {
-        case 'admin':
-          navigate('/admin/dashboard');
-          break;
-        case 'responsable':
-          navigate('/responsable/dashboard');
-          break;
-        case 'collaborateur':
-          navigate('/collaborateur/dashboard'); 
-          break;
-        default:
-          navigate('/');
-          break;
-        } 
-        showMessage('Connexion réussie !', 'success'); 
+          // Redirection selon le rôle
+          switch(role) {
+            case 'admin':
+              navigate('/admin/dashboard');
+              break;
+            case 'responsable':
+              navigate('/responsable/dashboard');
+              break;
+            case 'collaborateur':
+              navigate('/collaborateur/dashboard'); 
+              break;
+            default:
+              navigate('/');
+              break;
+          }
         } else {
           throw new Error('Échec de la connexion');
         }
       } catch (error) {
-        console.error('Erreur complète:', {
-          error,
-          response: error.response,
-          request: error.request,
-          config: error.config
-        });
+        console.error('Erreur de connexion:', error);
         
         if (error.response?.data?.errors) {
           Object.entries(error.response.data.errors).forEach(([field, messages]) => {
@@ -66,17 +56,17 @@ const LoginForm = () => {
           });
         } else {
           const errorMessage = error.response?.data?.message 
-            ? `Erreur serveur: ${error.response.data.message}`
-            : 'Impossible de se connecter au serveur. Vérifiez votre connexion.';
+            ? error.response.data.message
+            : 'Impossible de se connecter. Vérifiez votre email et mot de passe.';
           
-          showMessage(errorMessage, 'error');
+          // Afficher l'erreur dans un composant Alert
+          alert(errorMessage);
         }
       } finally {
         setSubmitting(false);
       }
     },
   });
-
 
   return (
     <Box component="form" onSubmit={formik.handleSubmit} sx={{ mt: 2 }}>
@@ -103,27 +93,18 @@ const LoginForm = () => {
         helperText={formik.touched.password && formik.errors.password}
         margin="normal"
       />
-      <Box sx={{ textAlign: 'right', mb: 2 }}>
-        <Link href="#" variant="body2" color="primary">
-          Mot de passe oublié ?
-        </Link>
-      </Box>
       <Button
-        color="primary"
-        variant="contained"
-        fullWidth
         type="submit"
-        sx={{ 
-          mt: 2,
-          py: 1.5,
-          backgroundColor: '#008a8c',
-          '&:hover': {
-            backgroundColor: '#00696b',
-          }
-        }}
+        fullWidth
+        variant="contained"
+        sx={{ mt: 2, mb: 2 }}
+        disabled={formik.isSubmitting}
       >
         Se connecter
       </Button>
+      <Link href="/auth/register" variant="body2">
+        Créer un compte
+      </Link>
     </Box>
   );
 };
