@@ -24,7 +24,7 @@ const UserManagement = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await api.get('/admin/users');
+        const response = await api.get('api/users');
         setUsers(response.data);
       } catch (error) {
         console.error('Erreur lors du chargement des utilisateurs:', error);
@@ -38,7 +38,7 @@ const UserManagement = () => {
 
   const handleStatusChange = async (userId, currentStatus) => {
     try {
-      await api.put(`/admin/users/${userId}/status`, {
+      await api.put(`/api/users/${userId}/status`, {
         isActive: !currentStatus
       });
       setUsers(users.map(user => 

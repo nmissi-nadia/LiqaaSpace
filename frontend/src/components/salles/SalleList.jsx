@@ -163,7 +163,7 @@ const SalleList = () => {
                     <TableCell align="right">
                       <IconButton 
                         component={Link} 
-                        to={`/salles/${salle.id}`}
+                        to={`api/salles/${salle.id}`}
                         color="primary"
                         size="small"
                       >
@@ -171,7 +171,7 @@ const SalleList = () => {
                       </IconButton>
                       <IconButton 
                         component={Link} 
-                        to={`/salles/${salle.id}/modifier`}
+                        to={`api/salles/${salle.id}/modifier`}
                         color="primary"
                         size="small"
                       >

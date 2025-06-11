@@ -189,4 +189,50 @@ class ReservationController extends Controller
             'data' => $reservation->load('salle', 'user')
         ]);
     }
+// route vers stats et documentation swagger
+
+
+    /**
+     * @OA\Get(
+     *     path="/api/reservations/stats",
+     *     summary="Obtenir les statistiques des réservations",
+     *     tags={"Réservations"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Statistiques des réservations récupérées avec succès"
+     *     )
+     * )
+     */
+    public function getStats()
+    {
+        $stats = [];
+        $currentMonth = now()->startOfMonth();
+        
+        for ($i = 0; $i < 6; $i++) {
+            $month = $currentMonth->copy()->subMonths($i);
+            $monthNumber = $month->month;
+            $year = $month->year;
+            
+            $stats[] = [
+                'date' => $month->format('M Y'),
+                'count' => Reservation::whereYear('date', $year)
+                    ->whereMonth('date', $monthNumber)
+                    ->count()
+            ];
+        }
+        
+        return response()->json([
+            'status' => 'success',
+            'data' => array_reverse($stats)
+        ]);
+    }
+    // reservation par utilisateur
+    public function getReservationsByUser(string $id)
+    {
+        $reservations = Reservation::where('collaborateur_id', $id)->get();
+        return response()->json([
+            'status' => 'success',
+            'data' => $reservations
+        ]);
+    }
 }

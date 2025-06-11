@@ -50,14 +50,14 @@ const ResponsableLayout = () => {
   ];
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-stone-50">
       {/* AppBar/Header */}
-      <header className="fixed top-0 left-0 right-0 bg-blue-600 text-white shadow-lg z-50 h-16">
+      <header className="fixed top-0 left-0 right-0 bg-green-700 text-white shadow-lg z-50 h-16">
         <div className="flex items-center justify-between h-full px-4">
           <div className="flex items-center">
             <button
               onClick={handleDrawerToggle}
-              className={`p-2 rounded-md hover:bg-blue-700 transition-colors mr-3 ${
+              className={`p-2 rounded-md hover:bg-green-800 transition-colors mr-3 ${
                 open && !isMobile ? 'hidden' : ''
               }`}
               aria-label="Toggle menu"
@@ -73,7 +73,7 @@ const ResponsableLayout = () => {
             </span>
             <button
               onClick={logout}
-              className="p-2 rounded-md hover:bg-blue-700 transition-colors"
+              className="p-2 rounded-md hover:bg-green-800 transition-colors"
               title="Déconnexion"
             >
               <LogoutIcon />
@@ -99,18 +99,18 @@ const ResponsableLayout = () => {
         `}
       >
         {/* Header du drawer */}
-        <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
+        <div className="flex items-center justify-between h-16 px-4 bg-green-50 border-b border-green-100">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+            <div className="w-10 h-10 bg-green-700 rounded-lg flex items-center justify-center text-white font-bold">
               L
             </div>
-            <span className="text-lg font-semibold text-gray-800">LiqaaSpace</span>
+            <span className="text-lg font-semibold text-green-800">LiqaaSpace</span>
           </div>
           <button
             onClick={handleDrawerClose}
-            className="p-1 rounded-md hover:bg-gray-100 transition-colors md:hidden"
+            className="p-1 rounded-md hover:bg-green-100 transition-colors md:hidden"
           >
-            <CloseIcon />
+            <CloseIcon className="text-green-700" />
           </button>
         </div>
 
@@ -127,12 +127,12 @@ const ResponsableLayout = () => {
                     className={`
                       flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-200
                       ${isActive 
-                        ? 'bg-blue-50 text-blue-700 border-r-4 border-blue-600 font-medium' 
-                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                        ? 'bg-green-100 text-green-800 border-r-4 border-green-600 font-medium shadow-sm' 
+                        : 'text-stone-700 hover:bg-stone-100 hover:text-stone-900'
                       }
                     `}
                   >
-                    <span className={`text-xl ${isActive ? 'text-blue-600' : 'text-gray-500'}`}>
+                    <span className={`text-xl ${isActive ? 'text-green-700' : 'text-stone-500'}`}>
                       {item.icon}
                     </span>
                     <span>{item.text}</span>
@@ -151,8 +151,10 @@ const ResponsableLayout = () => {
           ${open && !isMobile ? 'md:ml-60' : 'ml-0'}
         `}
       >
-        <div className="p-6">
-          <Outlet />
+        <div className="p-6 bg-white min-h-screen">
+          <div className="max-w-7xl mx-auto">
+            <Outlet />
+          </div>
         </div>
       </main>
     </div>

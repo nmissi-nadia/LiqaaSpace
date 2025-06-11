@@ -7,6 +7,7 @@ use App\Http\Controllers\API\SalleController;
 use App\Http\Controllers\API\ReservationController;
 use App\Http\Controllers\API\DisponibiliteController;
 use App\Http\Controllers\API\UserController;
+use App\Http\Controllers\API\StatsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,4 +44,11 @@ Route::get('/test', function () {
     return response()->json(['message' => 'Connexion OK']);
 });
 Route::apiResource('reservations', ReservationController::class);
+// api/reservations/stats
+Route::get('/reservations/stats', [ReservationController::class, 'getStats']);
+// api/reservations/stats/user/{id}
+Route::get('/reservations/collaborateur/{id}', [ReservationController::class, 'getReservationsByUser']);
+// route vers stats
+Route::get('/stats', [StatsController::class, 'getStatsAdmin']);
+
 

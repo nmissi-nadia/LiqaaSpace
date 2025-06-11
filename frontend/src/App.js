@@ -13,10 +13,12 @@ import ResponsableLayout from './components/Responsable/ResponsableLayout';
 import ResponsableDashboard from './components/Responsable/Dashboard';
 import SallesManagement from './components/Responsable/sallesManagement';
 import ReservationsManagement from './components/Responsable/ReservationsManagement';
-import CollaborateurDashboard from './components/Collaborateur/Dashboard';
+import CollaborateurDashboard from './components/Collaborateur/CollaborateurDashboard';
 import Salles from './pages/Salles';
 import NotFound from './pages/NotFound';
 import CollaborateurLayout from './components/Collaborateur/CollaborateurLayout';
+import MesReservations from './components/Collaborateur/mesreservation';
+import SallesDisponibles from './components/Collaborateur/sallesdispo';
 
 const theme = createTheme({
   palette: {
@@ -38,7 +40,7 @@ function App() {
             {/* Public Routes */}
             <Route path="/auth" element={<AuthPage />} />
             {/* Dashboard */}
-            <Route path="/" element={<Layout><Dashboard /></Layout>} />
+            <Route path="/" element={<Dashboard />} />
             
             {/* Protected Admin Routes */}
             <Route 
@@ -46,7 +48,10 @@ function App() {
               element={<AdminLayout />}
             >
               <Route index element={<AdminDashboard />} />
-              <Route path="users" element={<UserManagement />} />
+              <Route 
+                path="admin/users" 
+                element={<UserManagement />} 
+              />
               {/* Add more admin routes as needed */}
             </Route>
 
@@ -61,13 +66,11 @@ function App() {
             </Route>
 
             {/* Protected Collaborateur Routes */}
-            <Route 
-              path="/collaborateur/dashboard" 
-              element={<CollaborateurLayout>
-                    <CollaborateurDashboard />
-                  </CollaborateurLayout>
-              } 
-            />
+            <Route path="/collaborateur" element={<CollaborateurLayout />}>
+              <Route index element={<CollaborateurDashboard />} />
+              <Route path="mesreservations" element={<MesReservations />} />
+              <Route path="sallesdisponibles" element={<SallesDisponibles />} />
+            </Route>
 
             {/* Public Routes */}
             <Route path="/" element={<Layout><Dashboard /></Layout>} />

@@ -23,7 +23,7 @@ const LoginForm = () => {
     onSubmit: async (values, { setSubmitting, setFieldError }) => {
       try {
         const success = await login(values.email, values.password);
-        
+        console.log('Token after login:', localStorage.getItem('access_token'));
         if (success) {
           // Récupérer le rôle de l'utilisateur
           const userResponse = await api.get('api/user');  
@@ -38,7 +38,7 @@ const LoginForm = () => {
               navigate('/responsable/dashboard');
               break;
             case 'collaborateur':
-              navigate('/collaborateur/dashboard'); 
+              navigate('/collaborateur'); 
               break;
             default:
               navigate('/');
@@ -99,10 +99,11 @@ const LoginForm = () => {
         variant="contained"
         sx={{ mt: 2, mb: 2 }}
         disabled={formik.isSubmitting}
+        color="primary"
       >
         Se connecter
       </Button>
-      <Link href="/auth/register" variant="body2">
+      <Link href="/auth/register" variant="body2" color="primary">
         Créer un compte
       </Link>
     </Box>

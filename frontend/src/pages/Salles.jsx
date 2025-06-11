@@ -57,7 +57,7 @@ const Salles = () => {
     
     try {
       if (editingSalle) {
-        await api.put(`/salles/${editingSalle.id}`, formData, {
+        await api.put(`api/salles/${editingSalle.id}`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -65,7 +65,7 @@ const Salles = () => {
         console.log('Salle mise à jour avec succès');
       } else {
         console.log(formData);
-        await api.post('/salles', formData, {
+        await api.post('api/salles', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -83,7 +83,7 @@ const Salles = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer cette salle ?')) {
       try {
-        await api.delete(`/salles/${id}`);
+        await api.delete(`api/salles/${id}`);
         console.log('Salle supprimée avec succès');
         fetchSalles();
       } catch (error) {

@@ -104,7 +104,7 @@ const SalleForm = ({ onSubmit, initialValues = {}, isEdit = false }) => {
           console.log(pair[0] + ': ', pair[1]);
         }
 
-        const url = isEdit ? `/salles/${id}` : '/salles';
+        const url = isEdit ? `api/salles/${id}` : 'api/salles';
         const method = isEdit ? 'put' : 'post';
         
         console.log(`Sending ${method.toUpperCase()} request to:`, url);

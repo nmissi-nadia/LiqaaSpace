@@ -29,17 +29,17 @@ const Home = () => {
     {
       title: "Réservez vos salles en toute simplicité",
       subtitle: "Gérez efficacement vos espaces de réunion avec notre plateforme intelligente",
-      image: "bg-gradient-to-r from-teal-500 via-teal-600 to-teal-700"
+      image: "bg-gradient-to-r from-green-300 via-green-400 to-green-500"
     },
     {
       title: "Optimisez l'utilisation de vos espaces",
       subtitle: "Analysez les données d'occupation et maximisez votre retour sur investissement",
-      image: "bg-gradient-to-r from-teal-600 via-slate-500 to-teal-800"
+      image: "bg-gradient-to-r from-green-400 via-green-500 to-green-600"
     },
     {
       title: "Collaboration sans limites",
       subtitle: "Des salles équipées des dernières technologies pour vos réunions",
-      image: "bg-gradient-to-r from-slate-400 via-teal-600 to-slate-600"
+      image: "bg-gradient-to-r from-green-400 via-green-500 to-green-600"
     }
   ];
 
@@ -55,25 +55,25 @@ const Home = () => {
       title: "Réservation intelligente",
       description: "IA intégrée pour suggérer les meilleures créneaux selon vos besoins",
       icon: <Zap className="w-6 h-6" />,
-      color: "bg-gradient-to-br from-slate-400 to-slate-500"
+      color: "bg-gradient-to-br from-green-400 to-green-500"
     },
     {
       title: "Gestion centralisée",
       description: "Tableau de bord unique pour gérer toutes vos salles et réservations",
       icon: <Building className="w-6 h-6" />,
-      color: "bg-gradient-to-br from-teal-400 to-teal-600"
+      color: "bg-gradient-to-br from-green-500 to-green-600"
     },
     {
       title: "Intégrations avancées",
       description: "Synchronisation avec Outlook, Google Calendar, Teams et Zoom",
       icon: <Shield className="w-6 h-6" />,
-      color: "bg-gradient-to-br from-teal-600 to-teal-800"
+      color: "bg-gradient-to-br from-green-600 to-green-700"
     },
     {
       title: "Analytics en temps réel",
       description: "Rapports détaillés sur l'utilisation et l'optimisation des espaces",
       icon: <Users className="w-6 h-6" />,
-      color: "bg-gradient-to-br from-slate-500 to-teal-600"
+      color: "bg-gradient-to-br from-green-500 to-green-600"
     }
   ];
 
@@ -83,21 +83,21 @@ const Home = () => {
       capacity: "4-8 personnes",
       equipment: [<Monitor className="w-4 h-4" />, <Wifi className="w-4 h-4" />, <Camera className="w-4 h-4" />],
       price: "25€/h",
-      image: "bg-gradient-to-br from-teal-50 to-teal-100"
+      image: "bg-gradient-to-br from-green-50 to-green-100"
     },
     {
       name: "Salle de conférence",
       capacity: "20-50 personnes",
       equipment: [<Monitor className="w-4 h-4" />, <Wifi className="w-4 h-4" />, <Headphones className="w-4 h-4" />],
       price: "75€/h",
-      image: "bg-gradient-to-br from-slate-50 to-slate-100"
+      image: "bg-gradient-to-br from-green-50 to-white"
     },
     {
       name: "Espace coworking",
       capacity: "10-15 personnes",
       equipment: [<Wifi className="w-4 h-4" />, <Coffee className="w-4 h-4" />, <Car className="w-4 h-4" />],
       price: "15€/h",
-      image: "bg-gradient-to-br from-teal-100 to-slate-100"
+      image: "bg-gradient-to-br from-white to-green-50"
     }
   ];
 
@@ -129,19 +129,19 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <div className="bg-gradient-to-r from-teal-600 to-teal-700 w-10 h-10 rounded-xl flex items-center justify-center">
+              <div className="bg-gradient-to-r from-green-600 to-green-700 w-10 h-10 rounded-xl flex items-center justify-center">
                 <Building className="w-6 h-6 text-white" />
               </div>
-              <span className="ml-3 text-xl font-bold bg-gradient-to-r from-teal-600 to-teal-800 bg-clip-text text-transparent">
+              <span className="ml-3 text-xl font-bold bg-gradient-to-r from-green-600 to-green-800 bg-clip-text text-transparent">
                 LiqaaSpace
               </span>
             </div>
             
             <div className="hidden md:flex items-center space-x-8">
-              <a href="#features" className="text-gray-700 hover:text-teal-600 transition-colors">Fonctionnalités</a>
-              <a href="#pricing" className="text-gray-700 hover:text-teal-600 transition-colors">Tarifs</a>
-              <a href="#about" className="text-gray-700 hover:text-teal-600 transition-colors">À propos</a>
-              <a href="/auth" className="bg-gradient-to-r from-teal-600 to-teal-700 text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all">
+              <a href="#features" className="text-gray-700 hover:text-green-600 transition-colors">Fonctionnalités</a>
+              <a href="#pricing" className="text-gray-700 hover:text-green-600 transition-colors">Tarifs</a>
+              <a href="#about" className="text-gray-700 hover:text-green-600 transition-colors">À propos</a>
+              <a href="/auth" className="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all">
                 Connexion
               </a>
             </div>
@@ -274,8 +274,8 @@ const Home = () => {
                   </div>
                   
                   <div className="flex justify-between items-center">
-                    <span className="text-2xl font-bold text-teal-600">{room.price}</span>
-                    <button className="bg-gradient-to-r from-teal-600 to-teal-700 text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all">
+                    <span className="text-2xl font-bold text-green-600">{room.price}</span>
+                    <button className="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all">
                       Réserver
                     </button>
                   </div>
@@ -315,12 +315,12 @@ const Home = () => {
       </div>
 
       {/* CTA Section */}
-      <div className="py-20 bg-gradient-to-r from-teal-600 via-slate-500 to-teal-800">
+      <div className="py-20 bg-green-400">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
             Prêt à transformer votre gestion d'espaces ?
           </h2>
-          <p className="text-xl text-teal-100 mb-12">
+          <p className="text-xl text-green-100 mb-12">
             Rejoignez des milliers d'entreprises qui optimisent leurs espaces avec LiqaaSpace
           </p>
           
@@ -342,10 +342,10 @@ const Home = () => {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-white text-teal-600 px-8 py-4 rounded-xl font-semibold hover:bg-teal-50 transition-colors duration-300 transform hover:scale-105 text-lg">
+            <button className="bg-white text-green-600 px-8 py-4 rounded-xl font-semibold hover:bg-green-50 transition-colors duration-300 transform hover:scale-105 text-lg">
               Démarrer l'essai gratuit
             </button>
-            <button className="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold hover:bg-white hover:text-teal-600 transition-all duration-300 transform hover:scale-105 text-lg">
+            <button className="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold hover:bg-white hover:text-green-600 transition-all duration-300 transform hover:scale-105 text-lg">
               Planifier une démo
             </button>
           </div>
@@ -353,12 +353,12 @@ const Home = () => {
       </div>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
+      <footer className="bg-white text-green-700 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center mb-4">
-                <div className="bg-gradient-to-r from-teal-600 to-teal-700 w-8 h-8 rounded-lg flex items-center justify-center mr-3">
+                <div className="bg-gradient-to-r from-green-600 to-green-700 w-8 h-8 rounded-lg flex items-center justify-center mr-3">
                   <Building className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-xl font-bold">LiqaaSpace</span>

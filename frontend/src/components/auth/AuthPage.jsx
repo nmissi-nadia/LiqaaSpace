@@ -29,7 +29,7 @@ const ImageSection = styled(Box)({
     left: 0,
     right: 0,
     bottom: 0,
-    background: 'rgba(0, 138, 140, 0.7)',
+    background: 'rgba(20, 218, 129, 0.7)',
   },
 });
 
@@ -93,7 +93,7 @@ const AuthPage = () => {
                 borderColor: '#008a8c',
                 '&:hover': {
                   borderColor: '#00696b',
-                  backgroundColor: 'rgba(0, 138, 140, 0.1)'
+                  backgroundColor: 'rgba(16, 224, 96, 0.1)'
                 }
               }}
             >

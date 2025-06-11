@@ -20,73 +20,104 @@ const CollaborateurLayout = () => {
     setCollapsed(!collapsed);
   };
 
-  // Déterminer l'élément de menu sélectionné en fonction de l'URL
   const getSelectedKey = () => {
     const path = location.pathname;
-    if (path.includes('mes-reservations')) return '2';
-    return '1'; // Par défaut, sélectionner l'accueil
+    if (path.includes('mesreservations')) return '2';
+    if (path.includes('sallesdisponibles')) return '3';
+    return '1';
   };
 
   return (
-    <Layout className="min-h-screen">
-      <Sider 
-        trigger={null} 
-        collapsible 
+    <Layout className="min-h-screen bg-white">
+      <Sider
+        trigger={null}
+        collapsible
         collapsed={collapsed}
-        width={250}
-        className="site-layout-background"
+        className="bg-white border-r-2 border-green-500 shadow-lg"
       >
-        <div className="p-4 text-center text-white h-16 flex items-center justify-center text-lg font-bold">
-          {!collapsed ? 'Espace Collaborateur' : 'EC'}
+        <div className="h-16 m-4 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center text-white font-bold shadow-lg shadow-green-500/30">
+          <span className={collapsed ? 'text-sm' : 'text-base'}>
+            {!collapsed ? 'Liqaa' : 'LS'}
+          </span>
+          <span className="text-white font-bold text-lg">Space</span>
         </div>
+
         <Menu
-          theme="dark"
           mode="inline"
-          defaultSelectedKeys={[getSelectedKey()]}
           selectedKeys={[getSelectedKey()]}
+          className="bg-transparent border-none"
           items={[
             {
               key: '1',
-              icon: <HomeOutlined />,
-              label: <Link to="/collaborateur">Accueil</Link>,
+              icon: <HomeOutlined className="text-green-600" />,
+              label: (
+                <Link 
+                  to="/collaborateur/dashboard" 
+                  className="text-gray-700 font-medium hover:text-green-600 transition-colors"
+                >
+                  Accueil
+                </Link>
+              ),
             },
             {
               key: '2',
-              icon: <CalendarOutlined />,
-              label: <Link to="/collaborateur/mes-reservations">Mes Réservations</Link>,
+              icon: <CalendarOutlined className="text-green-600" />,
+              label: (
+                <Link 
+                  to="/collaborateur/mesreservations" 
+                  className="text-gray-700 font-medium hover:text-green-600 transition-colors"
+                >
+                  Mes Réservations
+                </Link>
+              ),
             },
             {
               key: '3',
-              icon: <TeamOutlined />,
-              label: <Link to="/collaborateur/salles">Salles Disponibles</Link>,
+              icon: <TeamOutlined className="text-green-600" />,
+              label: (
+                <Link 
+                  to="/collaborateur/sallesdisponibles" 
+                  className="text-gray-700 font-medium hover:text-green-600 transition-colors"
+                >
+                  Salles Disponibles
+                </Link>
+              ),
             },
             {
               key: '4',
-              icon: <LogoutOutlined />,
-              label: 'Déconnexion',
+              icon: <LogoutOutlined className="text-red-600" />,
+              label: (
+                <span className="text-red-600 font-medium hover:text-red-700 transition-colors cursor-pointer">
+                  Déconnexion
+                </span>
+              ),
               onClick: () => {
-                // Logique de déconnexion
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
                 console.log('Déconnexion');
               },
             },
           ]}
+          theme="light"
         />
       </Sider>
-      <Layout className="site-layout">
-        <Header className="site-layout-background p-0 bg-white flex items-center pl-4 shadow-sm sticky top-0 z-10">
-          {React.createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
-            className: 'trigger text-lg cursor-pointer',
-            onClick: toggleCollapsed,
-          })}
-          <h1 className="mx-4 my-0 text-lg font-medium">
-            {getSelectedKey() === '1' && 'Tableau de bord'}
-            {getSelectedKey() === '2' && 'Mes Réservations'}
-            {getSelectedKey() === '3' && 'Salles Disponibles'}
-          </h1>
+
+      <Layout className="bg-white">
+        <Header className="px-6 bg-gradient-to-r from-white to-green-50 border-b-2 border-green-500 flex items-center justify-between shadow-sm">
+          <div className="flex items-center">
+            {React.createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
+              className: 'text-green-600 text-lg cursor-pointer p-2 rounded hover:bg-green-50 transition-all duration-300',
+              onClick: toggleCollapsed,
+            })}
+            <h2 className="ml-4 text-gray-700 font-semibold text-xl">
+              {getSelectedKey() === '1' && 'Tableau de bord'}
+              {getSelectedKey() === '2' && 'Mes Réservations'}
+              {getSelectedKey() === '3' && 'Salles Disponibles'}
+            </h2>
+          </div>
         </Header>
-        <Content className="m-6 p-6 min-h-70 bg-white rounded-lg">
+
+        <Content className="m-6 p-6 bg-white rounded-xl shadow-sm border border-green-100 min-h-[calc(100vh-7rem)]">
           <Outlet />
         </Content>
       </Layout>

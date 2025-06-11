@@ -1,11 +1,13 @@
+import React, { useEffect, useState } from 'react';
 import { Grid, Paper, Typography, Box } from '@mui/material';
 import {
   People as PeopleIcon,
-  MeetingRoom as RoomIcon,
+  MeetingRoom as MeetingRoomIcon,
   Event as EventIcon,
   BarChart as StatsIcon
 } from '@mui/icons-material';
 import { Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
+import api from '../../services/api';
 
 const StatCard = ({ title, value, icon: Icon, color = 'primary' }) => (
   <Grid item xs={12} sm={6} md={3}>
@@ -28,26 +30,75 @@ const StatCard = ({ title, value, icon: Icon, color = 'primary' }) => (
 );
 
 const AdminDashboard = () => {
-  const stats = [
-    { title: 'Utilisateurs', value: '156', icon: PeopleIcon, color: 'primary' },
-    { title: 'Salles', value: '24', icon: RoomIcon, color: 'secondary' },
-    { title: 'Réservations', value: '89', icon: EventIcon, color: 'success' },
-    { title: 'Taux occupation', value: '78%', icon: StatsIcon, color: 'warning' },
-  ];
+      const [stats, setStats] = useState({
+        totalUsers: 0,
+        totalRooms: 0,
+        totalReservations: 0,
+        totalRevenue: 0
+      });
+
+      const [reservationsData, setReservationsData] = useState([]);
+      const [loading, setLoading] = useState(true);
+
+      useEffect(() => {
+        const fetchStats = async () => {
+          try {
+            // Récupérer les statistiques générales
+            const statsResponse = await api.get('api/stats');
+            setStats(statsResponse.data);
+
+            // Récupérer les données pour le graphique
+            const reservationsResponse = await api.get('api/reservations/stats');
+            setReservationsData(reservationsResponse.data);
+          } catch (error) {
+            console.error('Erreur lors du chargement des statistiques:', error);
+          } finally {
+            setLoading(false);
+          }
+        };
+
+        fetchStats();
+      }, []);
+
+      if (loading) {
+        return <Typography variant="h6">Chargement des statistiques...</Typography>;
+      }
 
   return (
     <Box>
       <Typography variant="h4" gutterBottom>Tableau de bord</Typography>
       <Grid container spacing={3}>
-        {stats.map((stat, index) => (
-          <StatCard key={index} {...stat} />
-        ))}
+      <StatCard 
+          title="Utilisateurs"
+          value={stats.totalUsers}
+          icon={PeopleIcon}
+          color="primary"
+        />
+        <StatCard 
+          title="Salles"
+          value={stats.totalRooms}
+          icon={MeetingRoomIcon}
+          color="secondary"
+        />
+        <StatCard 
+          title="Réservations"
+          value={stats.totalReservations}
+          icon={EventIcon}
+          color="success"
+        />
+        <StatCard 
+          title="Revenu"
+          value={`${stats.totalRevenue} €`}
+          icon={StatsIcon}
+          color="warning"
+        />
         
         {/* Dernières réservations */}
         <Grid item xs={12}>
           <Paper sx={{ p: 3, mt: 3 }}>
             <Typography variant="h6" gutterBottom>Dernières réservations</Typography>
             {/* Ici vous pouvez ajouter un composant de tableau ou de liste */}
+
             <Table>
               <TableHead>
                 <TableRow>
