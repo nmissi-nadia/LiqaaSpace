@@ -190,7 +190,7 @@ const SallesDisponibles = () => {
         <div style={{ marginTop: '12px' }}>
           <Space size="middle">
             <Badge 
-              count={salles.filter(s => s.status === 'disponible').length} 
+              count={salles.filter(s => s.status === 'active').length} 
               style={{ backgroundColor: '#52c41a' }}
             >
               <Tag color="success">Disponibles</Tag>

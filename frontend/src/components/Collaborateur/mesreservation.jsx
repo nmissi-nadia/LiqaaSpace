@@ -147,7 +147,7 @@ const MesReservations = () => {
       render: (statut) => getStatusTag(statut),
       filters: [
         { text: 'Confirmée', value: 'confirmée' },
-        { text: 'En attente', value: 'en_attente' },
+        { text: 'En attente', value: 'en attente' },
         { text: 'Annulée', value: 'annulée' },
       ],
       onFilter: (value, record) => record.statut === value,
@@ -162,7 +162,7 @@ const MesReservations = () => {
           <a onClick={() => handleAction('voir', record)}>
             <EyeOutlined style={{ color: '#1890ff' }} />
           </a>
-          {record.statut === 'en_attente' && (
+          {record.statut === 'en attente' && (
             <>
               <a onClick={() => handleAction('modifier', record)}>
                 <EditOutlined style={{ color: '#52c41a' }} />

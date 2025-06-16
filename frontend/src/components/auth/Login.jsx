@@ -32,10 +32,10 @@ const LoginForm = () => {
           // Redirection selon le rôle
           switch(role) {
             case 'admin':
-              navigate('/admin/dashboard');
+              navigate('/admin');
               break;
             case 'responsable':
-              navigate('/responsable/dashboard');
+              navigate('/responsable');
               break;
             case 'collaborateur':
               navigate('/collaborateur'); 

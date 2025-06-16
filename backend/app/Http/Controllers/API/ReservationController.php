@@ -27,7 +27,7 @@ class ReservationController extends Controller
      */
     public function index()
     {
-        $reservations = Reservation::all();
+        $reservations = Reservation::all()->with('salle', 'collaborateur');
         return response()->json($reservations);
     }
 
@@ -69,7 +69,7 @@ class ReservationController extends Controller
         $reservation = Reservation::create($request->all());
         return response()->json([
             'message' => 'Reservation créée avec succès',
-            'data' => $reservation->load('salle', 'user')
+            'data' => $reservation->with('salle', 'collaborateur')
         ], 201);
     }
 

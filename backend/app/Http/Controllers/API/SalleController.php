@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Salle;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * @OA\Tag(
@@ -57,11 +58,10 @@ class SalleController extends Controller
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
      *             @OA\Schema(
-     *                 required={"nom","description","responsable_id","location","capacite","status"},
+     *                 required={"nom","description","location","capacite","status"},
      *                 @OA\Property(property="nom", type="string", example="Salle de conférence A"),
      *                 @OA\Property(property="description", type="string", example="Grande salle équipée d'un vidéoprojecteur"),
      *                 @OA\Property(property="images[]", type="array", @OA\Items(type="string", format="binary")),
-     *                 @OA\Property(property="responsable_id", type="integer", example=1),
      *                 @OA\Property(property="location", type="string", example="Bâtiment A, 1er étage"),
      *                 @OA\Property(property="capacite", type="integer", example=50),
      *                 @OA\Property(property="status", type="string", enum={"active","inactive"}, example="active")
@@ -84,13 +84,14 @@ class SalleController extends Controller
             'nom' => 'required|string|max:255',
             'description' => 'required|string',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'responsable_id' => 'required|exists:users,id',
             'location' => 'required|string',
             'capacite' => 'required|integer',
             'status' => 'required|string|in:active,inactive',
         ]);
 
+        // on capte le id de responsable_id par le id de user connecté
         $data = $request->except('images');
+        $data['responsable_id'] = Auth::user()->id;
         $images = [];
 
         if ($request->hasFile('images')) {
@@ -159,7 +160,6 @@ class SalleController extends Controller
      *                 type="array",
      *                 @OA\Items(type="string", example="salles/image.jpg")
      *             ),
-     *             @OA\Property(property="responsable_id", type="integer", example=1),
      *             @OA\Property(property="location", type="string", example="Bâtiment A, 1er étage"),
      *             @OA\Property(property="capacite", type="integer", example=50),
      *             @OA\Property(property="status", type="string", enum={"active","inactive"}, example="active")
@@ -186,13 +186,12 @@ class SalleController extends Controller
             'nom' => 'required|string|max:255',
             'description' => 'required|string',
             'images' => 'required|array',
-            'responsable_id' => 'required|exists:users,id',
             'location' => 'required|string',
             'capacite' => 'required|integer',
             'status' => 'required|string|in:active,inactive',
         ]);
-
         $salle = Salle::findOrFail($id);
+        $salle->responsable_id = Auth::user()->id;
         $salle->update($request->all());
         
         return response()->json($salle);

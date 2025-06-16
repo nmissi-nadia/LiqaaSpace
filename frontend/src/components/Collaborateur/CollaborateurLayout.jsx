@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Layout, Menu } from 'antd';
 import {
   HomeOutlined,
@@ -15,6 +15,7 @@ const { Header, Sider, Content } = Layout;
 const CollaborateurLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const toggleCollapsed = () => {
     setCollapsed(!collapsed);
@@ -52,7 +53,7 @@ const CollaborateurLayout = () => {
               icon: <HomeOutlined className="text-green-600" />,
               label: (
                 <Link 
-                  to="/collaborateur/dashboard" 
+                  to="/collaborateur" 
                   className="text-gray-700 font-medium hover:text-green-600 transition-colors"
                 >
                   Accueil
@@ -95,6 +96,7 @@ const CollaborateurLayout = () => {
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
                 console.log('Déconnexion');
+                navigate('/auth');
               },
             },
           ]}

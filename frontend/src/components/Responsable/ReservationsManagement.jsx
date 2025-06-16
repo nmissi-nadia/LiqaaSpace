@@ -69,6 +69,7 @@ const ReservationsManagement = () => {
   const fetchReservations = async () => {
     try {
       const response = await api.get('/api/reservations');
+      console.log(response.data);
       setReservations(response.data);
       setLoading(false);
     } catch (error) {
@@ -101,11 +102,11 @@ const ReservationsManagement = () => {
 
   const filteredReservations = reservations
     .filter(reservation => 
-      (reservation.room?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-       reservation.user?.name?.toLowerCase().includes(searchTerm.toLowerCase())) &&
+      (reservation.salle?.nom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+       reservation.collaborateur?.name?.toLowerCase().includes(searchTerm.toLowerCase())) &&
       (statusFilter === 'all' || reservation.status === statusFilter)
     )
-    .sort((a, b) => new Date(b.start_time) - new Date(a.start_time));
+    .sort((a, b) => new Date(b.date + ' ' + b.heure_debut) - new Date(a.date + ' ' + a.heure_fin));
 
   const formatDate = (dateString) => {
     return format(parseISO(dateString), 'PPPp', { locale: fr });
@@ -156,9 +157,9 @@ const ReservationsManagement = () => {
               size="small"
             >
               <MenuItem value="all">Tous les statuts</MenuItem>
-              <MenuItem value="pending">En attente</MenuItem>
-              <MenuItem value="approved">Approuvées</MenuItem>
-              <MenuItem value="rejected">Rejetées</MenuItem>
+              <MenuItem value="en attente">En attente</MenuItem>
+              <MenuItem value="approuvee">Approuvées</MenuItem>
+              <MenuItem value="rejetee">Rejetées</MenuItem>
             </TextField>
           </Grid>
           <Grid item xs={12} md={3}>
@@ -193,27 +194,27 @@ const ReservationsManagement = () => {
                 <TableCell>
                   <Box display="flex" alignItems="center">
                     <RoomIcon color="action" sx={{ mr: 1 }} />
-                    {reservation.room?.name}
+                    {reservation.salle?.nom}
                   </Box>
                 </TableCell>
                 <TableCell>
                   <Box display="flex" alignItems="center">
                     <Avatar 
-                      src={reservation.user?.avatar} 
+                      src={reservation.collaborateur?.avatar} 
                       sx={{ width: 32, height: 32, mr: 1 }}
                     >
-                      {reservation.user?.name?.charAt(0)}
+                      {reservation.collaborateur?.name?.charAt(0)}
                     </Avatar>
-                    {reservation.user?.name}
+                    {reservation.collaborateur?.name}
                   </Box>
                 </TableCell>
                 <TableCell>
                   <Box display="flex" alignItems="center">
                     <TimeIcon fontSize="small" sx={{ mr: 1, color: 'text.secondary' }} />
                     <Box>
-                      <div>{formatDate(reservation.start_time)}</div>
+                      <div>{formatDate(reservation.date)}</div>
                       <div style={{ fontSize: '0.875rem', color: 'text.secondary' }}>
-                        {getTimeRange(reservation.start_time, reservation.end_time)}
+                        {getTimeRange(reservation.heure_debut, reservation.heure_fin)}
                       </div>
                     </Box>
                   </Box>
@@ -233,8 +234,8 @@ const ReservationsManagement = () => {
                 <TableCell align="center">
                   <Chip
                     icon={statusIcons[reservation.status]}
-                    label={reservation.status === 'pending' ? 'En attente' : 
-                           reservation.status === 'approved' ? 'Approuvée' : 'Rejetée'}
+                    label={reservation.status === 'en attente' ? 'En attente' : 
+                           reservation.status === 'approuvee' ? 'Approuvée' : 'Rejetée'}
                     color={statusColors[reservation.status]}
                     size="small"
                   />
@@ -245,18 +246,18 @@ const ReservationsManagement = () => {
                       <ViewIcon color="info" />
                     </IconButton>
                   </Tooltip>
-                  {reservation.status === 'pending' && (
+                  {reservation.status === 'en attente' && (
                     <>
                       <Tooltip title="Approuver" arrow>
                         <IconButton 
-                          onClick={() => handleStatusUpdate(reservation.id, 'approved')}
+                          onClick={() => handleStatusUpdate(reservation.id, 'approuvee')}
                         >
                           <ApproveIcon color="success" />
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="Rejeter" arrow>
                         <IconButton 
-                          onClick={() => handleStatusUpdate(reservation.id, 'rejected')}
+                          onClick={() => handleStatusUpdate(reservation.id, 'rejetee')}
                         >
                           <RejectIcon color="error" />
                         </IconButton>
@@ -292,7 +293,7 @@ const ReservationsManagement = () => {
                     Salle
                   </Typography>
                   <Typography variant="body1">
-                    {selectedReservation.room?.name} (Capacité: {selectedReservation.room?.capacity})
+                    {selectedReservation.room?.nom} (Capacité: {selectedReservation.room?.capacite})
                   </Typography>
                 </Grid>
 
@@ -323,7 +324,7 @@ const ReservationsManagement = () => {
                     Date
                   </Typography>
                   <Typography variant="body1">
-                    {formatDate(selectedReservation.start_time)}
+                    {formatDate(selectedReservation.date)}
                   </Typography>
                 </Grid>
 
@@ -332,7 +333,7 @@ const ReservationsManagement = () => {
                     Horaire
                   </Typography>
                   <Typography variant="body1">
-                    {getTimeRange(selectedReservation.start_time, selectedReservation.end_time)}
+                    {getTimeRange(selectedReservation.heure_debut, selectedReservation.heure_fin)}
                   </Typography>
                 </Grid>
 
@@ -352,7 +353,7 @@ const ReservationsManagement = () => {
                   <Box>
                     <Chip
                       icon={statusIcons[selectedReservation.status]}
-                      label={selectedReservation.status === 'pending' ? 'En attente' : 
+                      label={selectedReservation.status === 'active' ? 'En attente' : 
                              selectedReservation.status === 'approved' ? 'Approuvée' : 'Rejetée'}
                       color={statusColors[selectedReservation.status]}
                       sx={{ mt: 1 }}
@@ -373,7 +374,7 @@ const ReservationsManagement = () => {
               </Grid>
             </DialogContent>
             <DialogActions>
-              {selectedReservation.status === 'pending' && (
+              {selectedReservation.status === 'en attente' && (
                 <>
                   <Button
                     startIcon={<ApproveIcon />}

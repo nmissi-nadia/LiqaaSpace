@@ -19,7 +19,7 @@ import NotFound from './pages/NotFound';
 import CollaborateurLayout from './components/Collaborateur/CollaborateurLayout';
 import MesReservations from './components/Collaborateur/mesreservation';
 import SallesDisponibles from './components/Collaborateur/sallesdispo';
-
+import DetailsSalle from './components/Collaborateur/detailsSalle';
 const theme = createTheme({
   palette: {
     primary: {
@@ -57,11 +57,11 @@ function App() {
 
             {/* Protected Responsable Routes */}
             <Route 
-              path="/responsable/dashboard" 
+              path="/responsable" 
               element={<ResponsableLayout />}
             >
               <Route index element={<ResponsableDashboard />} />
-              <Route path="salles" element={<SallesManagement />} />
+              <Route path="Msalles" element={<SallesManagement />} />
               <Route path="reservations" element={<ReservationsManagement />} />
             </Route>
 
@@ -70,6 +70,7 @@ function App() {
               <Route index element={<CollaborateurDashboard />} />
               <Route path="mesreservations" element={<MesReservations />} />
               <Route path="sallesdisponibles" element={<SallesDisponibles />} />
+              <Route path="detailsSalle/:id" element={<DetailsSalle />} />
             </Route>
 
             {/* Public Routes */}

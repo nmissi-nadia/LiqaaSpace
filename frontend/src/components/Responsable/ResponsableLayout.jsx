@@ -1,163 +1,153 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Layout, Menu } from 'antd';
 import {
-  Menu as MenuIcon,
-  Dashboard as DashboardIcon,
-  MeetingRoom as RoomIcon,
-  CalendarToday as ReservationIcon,
-  Logout as LogoutIcon,
-  ChevronLeft as ChevronLeftIcon,
-  Close as CloseIcon
-} from '@mui/icons-material';
-import { useAuth } from '../../contexts/AuthContext';
+  HomeOutlined,
+  CalendarOutlined,
+  TeamOutlined,
+  LogoutOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
+  UserSwitchOutlined,
+  DashboardOutlined,
+  SettingOutlined
+} from '@ant-design/icons';
+
+const { Header, Sider, Content } = Layout;
 
 const ResponsableLayout = () => {
-  const { user, logout } = useAuth();
-  const [open, setOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
 
-  // Détecter la taille de l'écran
-  useEffect(() => {
-    const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 768);
-      if (window.innerWidth >= 768) {
-        setOpen(true);
-      } else {
-        setOpen(false);
-      }
-    };
-
-    checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-    return () => window.removeEventListener('resize', checkScreenSize);
-  }, []);
-
-  const handleDrawerToggle = () => {
-    setOpen(!open);
+  const toggleCollapsed = () => {
+    setCollapsed(!collapsed);
   };
 
-  const handleDrawerClose = () => {
-    if (isMobile) {
-      setOpen(false);
-    }
+  const getSelectedKey = () => {
+    const path = location.pathname;
+    if (path.includes('dashboard')) return '1';
+    if (path.includes('reservations')) return '2';
+    if (path.includes('Msalles')) return '3';
+    if (path.includes('parametres')) return '4';
+    return '1';
   };
-
-  const menuItems = [
-    { text: 'Tableau de bord', icon: <DashboardIcon />, path: '/responsable/dashboard' },
-    { text: 'Gestion des salles', icon: <RoomIcon />, path: '/responsable/salles' },
-    { text: 'Réservations', icon: <ReservationIcon />, path: '/responsable/reservations' },
-  ];
 
   return (
-    <div className="flex min-h-screen bg-stone-50">
-      {/* AppBar/Header */}
-      <header className="fixed top-0 left-0 right-0 bg-green-700 text-white shadow-lg z-50 h-16">
-        <div className="flex items-center justify-between h-full px-4">
-          <div className="flex items-center">
-            <button
-              onClick={handleDrawerToggle}
-              className={`p-2 rounded-md hover:bg-green-800 transition-colors mr-3 ${
-                open && !isMobile ? 'hidden' : ''
-              }`}
-              aria-label="Toggle menu"
-            >
-              <MenuIcon />
-            </button>
-            <h1 className="text-xl font-semibold">Espace Responsable</h1>
-          </div>
-          
-          <div className="flex items-center space-x-3">
-            <span className="text-sm font-medium hidden sm:block">
-              {user?.name || 'Responsable'}
-            </span>
-            <button
-              onClick={logout}
-              className="p-2 rounded-md hover:bg-green-800 transition-colors"
-              title="Déconnexion"
-            >
-              <LogoutIcon />
-            </button>
-          </div>
+    <Layout className="min-h-screen bg-white">
+      <Sider
+        trigger={null}
+        collapsible
+        collapsed={collapsed}
+        className="bg-white border-r-2 border-green-500 shadow-lg"
+      >
+        <div className="h-16 m-4 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center text-white font-bold shadow-lg shadow-green-500/30">
+          <span className={collapsed ? 'text-sm' : 'text-base'}>
+            {!collapsed ? 'Liqaa' : 'LS'}
+          </span>
+          <span className="text-white font-bold text-lg">Space</span>
         </div>
-      </header>
 
-      {/* Overlay pour mobile */}
-      {isMobile && open && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40"
-          onClick={handleDrawerClose}
+        <Menu
+          mode="inline"
+          selectedKeys={[getSelectedKey()]}
+          className="bg-transparent border-none"
+          items={[
+            {
+              key: '1',
+              icon: <HomeOutlined className="text-green-600" />,
+              label: (
+                <Link 
+                  to="/responsable" 
+                  className="text-gray-700 font-medium hover:text-green-600 transition-colors"
+                >
+                  Tableau de bord
+                </Link>
+              ),
+            },
+            {
+              key: '2',
+              icon: <CalendarOutlined className="text-green-600" />,
+              label: (
+                <Link 
+                  to="/responsable/reservations" 
+                  className="text-gray-700 font-medium hover:text-green-600 transition-colors"
+                >
+                  Gestion des réservations
+                </Link>
+              ),
+            },
+            {
+              key: '3',
+              icon: <TeamOutlined className="text-green-600" />,
+              label: (
+                <Link 
+                  to="/responsable/Msalles" 
+                  className="text-gray-700 font-medium hover:text-green-600 transition-colors"
+                >
+                  Gestion des salles
+                </Link>
+              ),
+            },
+            {
+              key: '4',
+              icon: <SettingOutlined className="text-green-600" />,
+              label: (
+                <Link 
+                  to="/responsable/parametres" 
+                  className="text-gray-700 font-medium hover:text-green-600 transition-colors"
+                >
+                  Paramètres
+                </Link>
+              ),
+            },
+            {
+              key: '5',
+              icon: <LogoutOutlined className="text-red-600" />,
+              label: (
+                <span 
+                  className="text-red-600 font-medium hover:text-red-700 transition-colors cursor-pointer"
+                  onClick={() => {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = '/auth';
+                  }}
+                >
+                  Déconnexion
+                </span>
+              ),
+            },
+          ]}
+          theme="light"
         />
-      )}
+      </Sider>
 
-      {/* Sidebar/Drawer */}
-      <aside
-        className={`
-          fixed top-0 left-0 h-full bg-white shadow-lg z-40 w-60 transform transition-transform duration-300 ease-in-out
-          ${open ? 'translate-x-0' : '-translate-x-full'}
-          ${!isMobile ? 'md:relative md:translate-x-0' : ''}
-        `}
-      >
-        {/* Header du drawer */}
-        <div className="flex items-center justify-between h-16 px-4 bg-green-50 border-b border-green-100">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-green-700 rounded-lg flex items-center justify-center text-white font-bold">
-              L
-            </div>
-            <span className="text-lg font-semibold text-green-800">LiqaaSpace</span>
-          </div>
-          <button
-            onClick={handleDrawerClose}
-            className="p-1 rounded-md hover:bg-green-100 transition-colors md:hidden"
-          >
-            <CloseIcon className="text-green-700" />
-          </button>
-        </div>
 
-        {/* Menu items */}
-        <nav className="mt-4">
-          <ul className="space-y-1 px-3">
-            {menuItems.map((item) => {
-              const isActive = location.pathname === item.path;
-              return (
-                <li key={item.text}>
-                  <Link
-                    to={item.path}
-                    onClick={handleDrawerClose}
-                    className={`
-                      flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-200
-                      ${isActive 
-                        ? 'bg-green-100 text-green-800 border-r-4 border-green-600 font-medium shadow-sm' 
-                        : 'text-stone-700 hover:bg-stone-100 hover:text-stone-900'
-                      }
-                    `}
-                  >
-                    <span className={`text-xl ${isActive ? 'text-green-700' : 'text-stone-500'}`}>
-                      {item.icon}
-                    </span>
-                    <span>{item.text}</span>
-                  </Link>
-                </li>
-              );
+      <Layout className="bg-white">
+        <Header className="px-6 bg-gradient-to-r from-white to-green-50 border-b-2 border-green-500 flex items-center justify-between shadow-sm">
+          <div className="flex items-center">
+            {React.createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
+              className: 'text-green-600 text-lg cursor-pointer p-2 rounded hover:bg-green-50 transition-all duration-300',
+              onClick: toggleCollapsed,
             })}
-          </ul>
-        </nav>
-      </aside>
-
-      {/* Main content */}
-      <main 
-        className={`
-          flex-1 transition-all duration-300 ease-in-out pt-16
-          ${open && !isMobile ? 'md:ml-60' : 'ml-0'}
-        `}
-      >
-        <div className="p-6 bg-white min-h-screen">
-          <div className="max-w-7xl mx-auto">
-            <Outlet />
+            <h2 className="ml-4 text-gray-700 font-semibold text-xl">
+              {getSelectedKey() === '1' && 'Tableau de bord'}
+              {getSelectedKey() === '2' && 'Gestion des réservations'}
+              {getSelectedKey() === '3' && 'Gestion des salles'}
+              {getSelectedKey() === '4' && 'Paramètres'}
+            </h2>
           </div>
-        </div>
-      </main>
-    </div>
+          <div className="flex items-center space-x-4">
+            <span className="text-gray-600">
+              Responsable
+            </span>
+          </div>
+        </Header>
+
+        <Content className="m-6 p-6 bg-white rounded-xl shadow-sm border border-green-100 min-h-[calc(100vh-7rem)]">
+          <Outlet />
+        </Content>
+      </Layout>
+    </Layout>
   );
 };
 
