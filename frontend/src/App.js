@@ -12,6 +12,7 @@ import UserManagement from './components/Admin/UserManagement';
 import ResponsableLayout from './components/Responsable/ResponsableLayout';
 import ResponsableDashboard from './components/Responsable/Dashboard';
 import SallesManagement from './components/Responsable/sallesManagement';
+import SalleManagement from './components/Admin/SalleManagement';
 import ReservationsManagement from './components/Responsable/ReservationsManagement';
 import CollaborateurDashboard from './components/Collaborateur/CollaborateurDashboard';
 import Salles from './pages/Salles';
@@ -20,6 +21,8 @@ import CollaborateurLayout from './components/Collaborateur/CollaborateurLayout'
 import MesReservations from './components/Collaborateur/mesreservation';
 import SallesDisponibles from './components/Collaborateur/sallesdispo';
 import DetailsSalle from './components/Collaborateur/detailsSalle';
+import DetailSalle from './components/Admin/details_salles';
+import ReservationAdmin from './components/Admin/reservationAdmin';
 const theme = createTheme({
   palette: {
     primary: {
@@ -44,15 +47,14 @@ function App() {
             
             {/* Protected Admin Routes */}
             <Route 
-              path="/admin/dashboard" 
+              path="/admin" 
               element={<AdminLayout />}
             >
               <Route index element={<AdminDashboard />} />
-              <Route 
-                path="admin/users" 
-                element={<UserManagement />} 
-              />
-              {/* Add more admin routes as needed */}
+              <Route path="users" element={<UserManagement />} />
+              <Route path="salles" element={<SalleManagement />} />
+              <Route path="salles/:id" element={<DetailSalle />} />
+              <Route path="reservations" element={<ReservationAdmin />} />
             </Route>
 
             {/* Protected Responsable Routes */}

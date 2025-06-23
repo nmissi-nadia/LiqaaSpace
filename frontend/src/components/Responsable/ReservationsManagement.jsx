@@ -68,7 +68,11 @@ const ReservationsManagement = () => {
 
   const fetchReservations = async () => {
     try {
-      const response = await api.get('/api/reservations');
+      const response = await api.get('/api/reservations', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      });
       console.log(response.data);
       setReservations(response.data);
       setLoading(false);
@@ -80,7 +84,11 @@ const ReservationsManagement = () => {
 
   const handleStatusUpdate = async (id, status) => {
     try {
-      await api.put(`/api/reservations/${id}/status`, { status });
+      await api.put(`/api/reservations/${id}/status`, { status }, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      });
       fetchReservations();
       if (selectedReservation?.id === id) {
         setSelectedReservation({ ...selectedReservation, status });

@@ -57,9 +57,9 @@ const MesReservations = () => {
 
   const getStatusTag = (statut) => {
     const statusConfig = {
-      'confirmée': { color: 'success', icon: <CheckCircleOutlined /> },
-      'en_attente': { color: 'processing', icon: <ClockCircleOutlined /> },
-      'annulée': { color: 'error', icon: <CloseCircleOutlined /> }
+      'accepté': { color: 'success', icon: <CheckCircleOutlined /> },
+      'en attente': { color: 'processing', icon: <ClockCircleOutlined /> },
+      'refusé': { color: 'error', icon: <CloseCircleOutlined /> }
     };
 
     const config = statusConfig[statut] || { color: 'default', icon: null };
@@ -146,9 +146,9 @@ const MesReservations = () => {
       key: 'statut',
       render: (statut) => getStatusTag(statut),
       filters: [
-        { text: 'Confirmée', value: 'confirmée' },
+        { text: 'Accepté', value: 'accepté' },
         { text: 'En attente', value: 'en attente' },
-        { text: 'Annulée', value: 'annulée' },
+        { text: 'Refusé', value: 'refusé' },
       ],
       onFilter: (value, record) => record.statut === value,
       filterMultiple: true,

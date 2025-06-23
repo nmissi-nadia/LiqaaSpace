@@ -33,7 +33,27 @@ const SallesDisponibles = () => {
     setSelectedSalle(salle);
     setIsModalVisible(true);
   };
-
+  const ImageWithFallback = ({ src, alt, className, style, fallbackSrc = '/placeholder.jpg' }) => {
+    const [imgSrc, setImgSrc] = React.useState(src);
+    const [hasError, setHasError] = React.useState(false);
+  
+    const handleError = () => {
+      if (!hasError) {
+        setHasError(true);
+        setImgSrc(fallbackSrc);
+      }
+    };
+  
+    return (
+      <img
+        src={imgSrc}
+        alt={alt}
+        className={className}
+        style={style}
+        onError={handleError}
+      />
+    );
+  };
   const handleReservationSubmit = async (values) => {
     try {
       const token = localStorage.getItem('access_token');
@@ -240,36 +260,70 @@ const SallesDisponibles = () => {
                       autoplay
                       effect="fade"
                       dots={{ className: 'custom-carousel-dots' }}
+                      style={{ width: '100%' }}
                     >
-                      {Array.isArray(salle.images) && salle.images.length > 0 ? (
-                        salle.images.map((image, index) => (
-                          <div key={index}>
-                            <img
-                              alt={salle.nom || 'Salle sans nom'}
-                              src={image}
-                              style={{ 
-                                width: '100%', 
-                                height: '220px', 
-                                objectFit: 'cover',
-                                filter: salle.status === 'occupée' ? 'grayscale(30%)' : 'none'
-                              }}
-                            />
+                      {(() => {
+                        // Conversion en tableau
+                        let imagesArray = [];
+                        if (typeof salle.images === 'string') {
+                          try {
+                            imagesArray = JSON.parse(salle.images);
+                          } catch (e) {
+                            console.error('Erreur de parsing JSON:', e);
+                          }
+                        } else if (Array.isArray(salle.images)) {
+                          imagesArray = salle.images;
+                        }
+
+                        // Si on a des images
+                        if (imagesArray && imagesArray.length > 0) {
+                          return imagesArray.map((image, index) => {
+                            // Nettoyage du chemin
+                            let imagePath = '';
+                            if (typeof image === 'string') {
+                              // Supprime les préfixes inutiles
+                              const cleanPath = image
+                                .replace(/^public\//, '')
+                                .replace(/^salles\//, '')
+                                .replace(/^storage\//, '')
+                                .replace(/^\//, '');
+                              
+                              imagePath = `http://localhost:8000/storage/salles${image}`;
+                            }
+
+                            return (
+                              <div key={index} style={{ height: '220px', overflow: 'hidden' }}>
+                                <ImageWithFallback
+                                  src={imagePath}
+                                  alt={salle.nom || `Salle ${salle.id}`}
+                                  style={{ 
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'cover',
+                                    filter: salle.status === 'inactive' ? 'grayscale(30%)' : 'none'
+                                  }}
+                                />
+                              </div>
+                            );
+                          });
+                        }
+
+                        // Aucune image
+                        return (
+                          <div style={{
+                            width: '100%',
+                            height: '220px',
+                            background: 'linear-gradient(135deg, #f0f2f5 0%, #d9d9d9 100%)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#666',
+                            fontSize: '16px'
+                          }}>
+                            📷 Aucune image disponible
                           </div>
-                        ))
-                      ) : (
-                        <div style={{
-                          width: '100%',
-                          height: '220px',
-                          background: 'linear-gradient(135deg, #52c41a 0%, #389e0d 100%)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: 'white',
-                          fontSize: '16px'
-                        }}>
-                          📷 Pas d'image disponible
-                        </div>
-                      )}
+                        );
+                      })()}
                     </Carousel>
                     
                     {/* Badge de statut flottant */}

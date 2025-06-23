@@ -1,45 +1,51 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
-  Box, 
   Grid, 
-  Typography, 
   Paper, 
-  useTheme,
-  useMediaQuery
+  Typography, 
+  CircularProgress,
+  Box,
+  Avatar,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Divider,
+  Chip,
+  useTheme
 } from '@mui/material';
-import {
-  MeetingRoom as RoomIcon,
+import { 
+  Room as RoomIcon, 
   EventAvailable as AvailableIcon,
   EventBusy as UnavailableIcon,
-  People as PeopleIcon
+  People as PeopleIcon,
+  Event as EventIcon,
+  Star as StarIcon,
+  AccessTime as TimeIcon
 } from '@mui/icons-material';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import api from '../../services/api';
-
-const data = api.get("api/reservations").then(res => res.data);
 
 const StatCard = ({ title, value, icon, color }) => (
   <Paper 
-    elevation={2} 
+    elevation={2}
     sx={{ 
       p: 3, 
       height: '100%',
+      borderRadius: 2,
       borderLeft: `4px solid ${color}`,
-      borderRadius: 1,
+      transition: 'transform 0.2s, box-shadow 0.2s',
+      '&:hover': {
+        transform: 'translateY(-4px)',
+        boxShadow: 3
+      }
     }}
   >
-    <Box display="flex" justifyContent="space-between" alignItems="center">
-      <Box>
-        <Typography color="textSecondary" variant="subtitle2" gutterBottom>
-          {title}
-        </Typography>
-        <Typography variant="h4" component="div">
-          {value}
-        </Typography>
-      </Box>
+    <Box display="flex" alignItems="center" gap={2}>
       <Box
         sx={{
-          backgroundColor: `${color}20`,
+          backgroundColor: `${color}15`,
           borderRadius: '50%',
           width: 56,
           height: 56,
@@ -51,25 +57,85 @@ const StatCard = ({ title, value, icon, color }) => (
       >
         {icon}
       </Box>
+      <Box>
+        <Typography variant="h5" fontWeight="bold">
+          {value}
+        </Typography>
+        <Typography variant="body2" color="textSecondary">
+          {title}
+        </Typography>
+      </Box>
     </Box>
   </Paper>
 );
 
-const ResponsableDashboard = () => {
+const Dashboard = () => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [stats, setStats] = useState(null);
+  const [topRooms, setTopRooms] = useState([]);
+  const [upcomingReservations, setUpcomingReservations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const [statsRes, roomsRes, reservationsRes] = await Promise.all([
+          api.get('api/stats/responsable', {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+          }),
+          api.get('api/salles/top5', {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+          }),
+          api.get('api/reservations/prochaine', {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+          })
+        ]);
+        
+        setStats(statsRes.data);
+        setTopRooms(roomsRes.data);
+        setUpcomingReservations(reservationsRes.data);
+      } catch (err) {
+        console.error('Error loading dashboard data:', err);
+        setError('Échec du chargement des données du tableau de bord');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box p={3} color="error.main">
+        <Typography>{error}</Typography>
+      </Box>
+    );
+  }
 
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom sx={{ mb: 4 }}>
-        Tableau de bord
-      </Typography>
-
-      <Grid container spacing={3} sx={{ mb: 4 }}>
+    <Box p={3}>
+      {/* Statistiques principales */}
+      <Grid container spacing={3} mb={4}>
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
             title="Salles disponibles"
-            value="15"
+            value={stats?.totalSallesdispo || 0}
             icon={<RoomIcon fontSize="large" />}
             color={theme.palette.primary.main}
           />
@@ -77,7 +143,7 @@ const ResponsableDashboard = () => {
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
             title="Réservations"
-            value="24"
+            value={stats?.totalReservations || 0}
             icon={<AvailableIcon fontSize="large" />}
             color={theme.palette.success.main}
           />
@@ -85,7 +151,7 @@ const ResponsableDashboard = () => {
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
             title="Salles occupées"
-            value="8"
+            value={stats?.totalSallesoccupe || 0}
             icon={<UnavailableIcon fontSize="large" />}
             color={theme.palette.warning.main}
           />
@@ -93,7 +159,7 @@ const ResponsableDashboard = () => {
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
             title="Utilisateurs actifs"
-            value="42"
+            value={stats?.totalCollaborateurs || 0}
             icon={<PeopleIcon fontSize="large" />}
             color={theme.palette.info.main}
           />
@@ -101,58 +167,87 @@ const ResponsableDashboard = () => {
       </Grid>
 
       <Grid container spacing={3}>
-        <Grid item xs={12} md={8}>
-          <Paper elevation={2} sx={{ p: 3, height: '100%' }}>
-            <Typography variant="h6" gutterBottom>
-              Activité des réservations
-            </Typography>
-            <Box sx={{ height: 300, mt: 2 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={data}
-                  margin={{
-                    top: 5,
-                    right: 30,
-                    left: 20,
-                    bottom: 5,
-                  }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="réservations" fill={theme.palette.primary.main} name="Réservations" />
-                  <Bar dataKey="salles" fill={theme.palette.secondary.main} name="Salles utilisées" />
-                </BarChart>
-              </ResponsiveContainer>
+        {/* Top 5 des salles les plus réservées */}
+        <Grid item xs={12} md={6}>
+          <Paper elevation={2} sx={{ p: 3, height: '100%', borderRadius: 2 }}>
+            <Box display="flex" alignItems="center" mb={2}>
+              <StarIcon color="primary" sx={{ mr: 1 }} />
+              <Typography variant="h6" fontWeight="bold">
+                Salles les plus réservées
+              </Typography>
             </Box>
+            <List>
+              {topRooms.map((room, index) => (
+                <React.Fragment key={room.id}>
+                  <ListItem>
+                    <ListItemAvatar>
+                      <Avatar sx={{ bgcolor: theme.palette.primary.light }}>
+                        <RoomIcon />
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={room.nom}
+                      secondary={`${room.reservations_count} réservations`}
+                    />
+                    <Chip 
+                      label={`#${index + 1}`} 
+                      color="primary" 
+                      size="small" 
+                      variant="outlined"
+                    />
+                  </ListItem>
+                  {index < topRooms.length - 1 && <Divider variant="inset" component="li" />}
+                </React.Fragment>
+              ))}
+            </List>
           </Paper>
         </Grid>
-        
-        <Grid item xs={12} md={4}>
-          <Paper elevation={2} sx={{ p: 3, height: '100%' }}>
-            <Typography variant="h6" gutterBottom>
-              Prochaines réservations
-            </Typography>
-            <Box sx={{ mt: 2 }}>
-              {[1, 2, 3].map((item) => (
-                <Box 
-                  key={item} 
-                  sx={{ 
-                    p: 2, 
-                    mb: 1, 
-                    backgroundColor: theme.palette.grey[100],
-                    borderRadius: 1,
-                    borderLeft: `3px solid ${theme.palette.primary.main}`
-                  }}
-                >
-                  <Typography variant="subtitle2">Réunion d'équipe</Typography>
-                  <Typography variant="body2" color="textSecondary">Salle A1 • 14:00 - 15:30</Typography>
-                  <Typography variant="body2" color="textSecondary">Jean Dupont</Typography>
-                </Box>
-              ))}
+
+        {/* Prochaines réservations */}
+        <Grid item xs={12} md={6}>
+          <Paper elevation={2} sx={{ p: 3, height: '100%', borderRadius: 2 }}>
+            <Box display="flex" alignItems="center" mb={2}>
+              <TimeIcon color="primary" sx={{ mr: 1 }} />
+              <Typography variant="h6" fontWeight="bold">
+                Prochaines réservations
+              </Typography>
             </Box>
+            <List>
+              {upcomingReservations.map((reservation) => (
+                <React.Fragment key={reservation.id}>
+                  <ListItem>
+                    <ListItemAvatar>
+                      <Avatar sx={{ bgcolor: theme.palette.success.light }}>
+                        <EventIcon />
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={reservation.salle?.nom}
+                      secondary={
+                        <>
+                          <Typography component="span" variant="body2" display="block">
+                            {format(new Date(reservation.date_debut), 'PPPp', { locale: fr })}
+                          </Typography>
+                          <Typography component="span" variant="body2" color="textSecondary">
+                            {reservation.utilisateur?.name}
+                          </Typography>
+                        </>
+                      }
+                    />
+                    <Chip 
+                      label={reservation.statut} 
+                      color={
+                        reservation.statut === 'accepté' ? 'success' : 
+                        reservation.statut === 'en attente' ? 'warning' : 'error'
+                      } 
+                      size="small"
+                    />
+                  </ListItem>
+                  {reservation !== upcomingReservations[upcomingReservations.length - 1] && 
+                    <Divider variant="inset" component="li" />}
+                </React.Fragment>
+              ))}
+            </List>
           </Paper>
         </Grid>
       </Grid>
@@ -160,4 +255,4 @@ const ResponsableDashboard = () => {
   );
 };
 
-export default ResponsableDashboard;
+export default Dashboard;

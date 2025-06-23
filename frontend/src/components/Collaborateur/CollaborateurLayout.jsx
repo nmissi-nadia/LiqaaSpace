@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Layout, Menu } from 'antd';
+import React, { useState } from "react"
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom"
+import { Layout, Menu, Avatar, Dropdown, Badge } from "antd"
 import {
   HomeOutlined,
   CalendarOutlined,
@@ -8,123 +8,183 @@ import {
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-} from '@ant-design/icons';
+  UserOutlined,
+  BellOutlined,
+} from "@ant-design/icons"
+import { Logo } from "../common/logo"
 
-const { Header, Sider, Content } = Layout;
+const { Header, Sider, Content } = Layout
 
 const CollaborateurLayout = () => {
-  const [collapsed, setCollapsed] = useState(false);
-  const location = useLocation();
-  const navigate = useNavigate();
+  const [collapsed, setCollapsed] = useState(false)
+  const location = useLocation()
+  const navigate = useNavigate()
 
   const toggleCollapsed = () => {
-    setCollapsed(!collapsed);
-  };
+    setCollapsed(!collapsed)
+  }
 
   const getSelectedKey = () => {
-    const path = location.pathname;
-    if (path.includes('mesreservations')) return '2';
-    if (path.includes('sallesdisponibles')) return '3';
-    return '1';
-  };
+    const path = location.pathname
+    if (path.includes("mesreservations")) return "2"
+    if (path.includes("sallesdisponibles")) return "3"
+    return "1"
+  }
+
+  const getPageTitle = () => {
+    const key = getSelectedKey()
+    switch (key) {
+      case "1":
+        return "Tableau de bord"
+      case "2":
+        return "Mes Réservations"
+      case "3":
+        return "Salles Disponibles"
+      default:
+        return "Tableau de bord"
+    }
+  }
+
+  const userMenuItems = [
+    {
+      key: "profile",
+      icon: <UserOutlined />,
+      label: "Mon Profil",
+    },
+    {
+      type: "divider",
+    },
+    {
+      key: "logout",
+      icon: <LogoutOutlined />,
+      label: "Déconnexion",
+      onClick: () => {
+        localStorage.removeItem("token")
+        localStorage.removeItem("user")
+        navigate("/auth")
+      },
+    },
+  ]
 
   return (
-    <Layout className="min-h-screen bg-white">
+    <Layout className="min-h-screen bg-gradient-to-br from-slate-50 to-emerald-50">
       <Sider
         trigger={null}
         collapsible
         collapsed={collapsed}
-        className="bg-white border-r-2 border-green-500 shadow-lg"
+        className="bg-white/95 backdrop-blur-sm border-r border-emerald-200 shadow-xl shadow-emerald-500/10"
+        style={{
+          boxShadow: "4px 0 24px rgba(16, 185, 129, 0.1)",
+        }}
       >
-        <div className="h-16 m-4 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center text-white font-bold shadow-lg shadow-green-500/30">
-          <span className={collapsed ? 'text-sm' : 'text-base'}>
-            {!collapsed ? 'Liqaa' : 'LS'}
-          </span>
-          <span className="text-white font-bold text-lg">Space</span>
-        </div>
+        <Logo collapsed={collapsed} />
 
         <Menu
           mode="inline"
           selectedKeys={[getSelectedKey()]}
-          className="bg-transparent border-none"
+          className="bg-transparent border-none px-2"
           items={[
             {
-              key: '1',
-              icon: <HomeOutlined className="text-green-600" />,
+              key: "1",
+              icon: <HomeOutlined className="text-emerald-600" />,
               label: (
-                <Link 
-                  to="/collaborateur" 
-                  className="text-gray-700 font-medium hover:text-green-600 transition-colors"
+                <Link
+                  to="/collaborateur"
+                  className="text-slate-700 font-medium hover:text-emerald-600 transition-all duration-200"
                 >
                   Accueil
                 </Link>
               ),
+              className: "mb-2 rounded-lg hover:bg-emerald-50",
             },
             {
-              key: '2',
-              icon: <CalendarOutlined className="text-green-600" />,
+              key: "2",
+              icon: <CalendarOutlined className="text-emerald-600" />,
               label: (
-                <Link 
-                  to="/collaborateur/mesreservations" 
-                  className="text-gray-700 font-medium hover:text-green-600 transition-colors"
+                <Link
+                  to="/collaborateur/mesreservations"
+                  className="text-slate-700 font-medium hover:text-emerald-600 transition-all duration-200"
                 >
                   Mes Réservations
                 </Link>
               ),
+              className: "mb-2 rounded-lg hover:bg-emerald-50",
             },
             {
-              key: '3',
-              icon: <TeamOutlined className="text-green-600" />,
+              key: "3",
+              icon: <TeamOutlined className="text-emerald-600" />,
               label: (
-                <Link 
-                  to="/collaborateur/sallesdisponibles" 
-                  className="text-gray-700 font-medium hover:text-green-600 transition-colors"
+                <Link
+                  to="/collaborateur/sallesdisponibles"
+                  className="text-slate-700 font-medium hover:text-emerald-600 transition-all duration-200"
                 >
                   Salles Disponibles
                 </Link>
               ),
-            },
-            {
-              key: '4',
-              icon: <LogoutOutlined className="text-red-600" />,
-              label: (
-                <span className="text-red-600 font-medium hover:text-red-700 transition-colors cursor-pointer">
-                  Déconnexion
-                </span>
-              ),
-              onClick: () => {
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                console.log('Déconnexion');
-                navigate('/auth');
-              },
+              className: "mb-2 rounded-lg hover:bg-emerald-50",
             },
           ]}
           theme="light"
         />
+
+        {/* User section at bottom */}
+        <div className="absolute bottom-4 left-0 right-0 px-4">
+          <div className="bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-xl p-3 border border-emerald-200">
+            <div className="flex items-center space-x-3">
+              <Avatar size={32} className="bg-emerald-500 flex-shrink-0">
+                <UserOutlined />
+              </Avatar>
+              {!collapsed && (
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-slate-700 truncate">Collaborateur</p>
+                  <p className="text-xs text-slate-500 truncate">En ligne</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </Sider>
 
-      <Layout className="bg-white">
-        <Header className="px-6 bg-gradient-to-r from-white to-green-50 border-b-2 border-green-500 flex items-center justify-between shadow-sm">
-          <div className="flex items-center">
+      <Layout className="bg-transparent">
+        <Header className="px-6 bg-white/80 backdrop-blur-sm border-b border-emerald-200 flex items-center justify-between shadow-sm">
+          <div className="flex items-center space-x-4">
             {React.createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
-              className: 'text-green-600 text-lg cursor-pointer p-2 rounded hover:bg-green-50 transition-all duration-300',
+              className:
+                "text-emerald-600 text-lg cursor-pointer p-2 rounded-lg hover:bg-emerald-50 transition-all duration-200",
               onClick: toggleCollapsed,
             })}
-            <h2 className="ml-4 text-gray-700 font-semibold text-xl">
-              {getSelectedKey() === '1' && 'Tableau de bord'}
-              {getSelectedKey() === '2' && 'Mes Réservations'}
-              {getSelectedKey() === '3' && 'Salles Disponibles'}
-            </h2>
+            <div>
+              <h1 className="text-slate-800 font-bold text-xl">{getPageTitle()}</h1>
+              <p className="text-slate-500 text-sm">Espace Collaborateur</p>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <Badge count={3} size="small">
+              <BellOutlined className="text-slate-600 text-lg cursor-pointer hover:text-emerald-600 transition-colors" />
+            </Badge>
+
+            <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" arrow>
+              <div className="flex items-center space-x-2 cursor-pointer hover:bg-emerald-50 rounded-lg px-3 py-2 transition-all duration-200">
+                <Avatar size={32} className="bg-emerald-500">
+                  <UserOutlined />
+                </Avatar>
+                <div className="hidden sm:block">
+                  <p className="text-sm font-medium text-slate-700">Collaborateur</p>
+                </div>
+              </div>
+            </Dropdown>
           </div>
         </Header>
 
-        <Content className="m-6 p-6 bg-white rounded-xl shadow-sm border border-green-100 min-h-[calc(100vh-7rem)]">
-          <Outlet />
+        <Content className="m-6">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl shadow-emerald-500/5 border border-emerald-100 p-6 min-h-[calc(100vh-8rem)]">
+            <Outlet />
+          </div>
         </Content>
       </Layout>
     </Layout>
-  );
-};
+  )
+}
 
-export default CollaborateurLayout;
+export default CollaborateurLayout

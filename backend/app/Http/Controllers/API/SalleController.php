@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Salle;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * @OA\Tag(
@@ -96,7 +98,7 @@ class SalleController extends Controller
 
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
-                $path = $image->store('salles', 'public');
+                $path = $image->storeAs('public/salles', $image->getClientOriginalName());
                 $images[] = $path;
             }
             $data['images'] = json_encode($images);
@@ -223,5 +225,68 @@ class SalleController extends Controller
         $salle = Salle::findOrFail($id);
         $salle->delete();
         return response()->json($salle);
+    }
+    /**
+     * @OA\Get(
+     *     path="/api/salles/top5",
+     *     summary="Obtenir les 5 salles les plus réservées",
+     *     tags={"Salles"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Salles récupérées avec succès"
+     *     )
+     * )
+     */
+    // les 5 salles les plus réservées
+    public function getTop5Salles()
+    {
+        $salles = Salle::withCount('reservations')
+            ->orderBy('reservations_count', 'desc')
+            ->take(5)
+            ->get();
+        return response()->json($salles);
+    }
+    // les salles disponibles
+    public function getdispo()
+    {
+        try {
+            // Log pour debug
+            \Log::info('Tentative de récupération des salles disponibles');
+            
+            // Vérification de la connexion à la base de données
+            if (!\DB::connection()->getPdo()) {
+                throw new \Exception('Erreur de connexion à la base de données');
+            }
+
+            // Vérification de l'existence de la table
+            if (!\Schema::hasTable('salles')) {
+                throw new \Exception('La table salles n\'existe pas');
+            }
+
+            // Vérification de l'existence de la colonne status
+            if (!\Schema::hasColumn('salles', 'status')) {
+                throw new \Exception('La colonne status n\'existe pas dans la table salles');
+            }
+
+            // Récupération des salles
+            $salles = Salle::where('status', 'active')->get();
+            
+            \Log::info('Nombre de salles trouvées : ' . $salles->count());
+            
+            return response()->json([
+                'success' => true,
+                'data' => $salles,
+                'count' => $salles->count()
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Erreur dans getSallesDisponibles : ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur lors de la récupération des salles disponibles',
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 }

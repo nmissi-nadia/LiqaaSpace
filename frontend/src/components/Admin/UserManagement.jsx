@@ -64,9 +64,7 @@ const UserManagement = () => {
             }}
             sx={{ mr: 2 }}
           />
-          <Button variant="contained" color="primary">
-            Ajouter un utilisateur
-          </Button>
+          
         </Box>
       </Box>
 

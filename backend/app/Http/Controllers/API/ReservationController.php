@@ -5,6 +5,8 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Reservation;
+use App\Notifications\ReservationCreee;
+use Illuminate\Support\Facades\Notification;
 
 /**
  * @OA\Tag(
@@ -27,7 +29,7 @@ class ReservationController extends Controller
      */
     public function index()
     {
-        $reservations = Reservation::all()->with('salle', 'collaborateur');
+        $reservations = Reservation::with('salle', 'collaborateur')->get();
         return response()->json($reservations);
     }
 
@@ -61,12 +63,14 @@ class ReservationController extends Controller
     {
         $request->validate([
             'salle_id' => 'required|exists:salles,id',
-            'user_id' => 'required|exists:users,id',
             'date_debut' => 'required|date',
             'date_fin' => 'required|date',
             'statut' => 'required|string|in:confirmé,annulé',
         ]);
+        $request->merge(['collaborateur_id' => auth()->user()->id]);
         $reservation = Reservation::create($request->all());
+        $utilisateur = auth()->user();
+        Notification::send($utilisateur, new ReservationCreee($reservation));
         return response()->json([
             'message' => 'Reservation créée avec succès',
             'data' => $reservation->with('salle', 'collaborateur')
@@ -234,5 +238,69 @@ class ReservationController extends Controller
             'status' => 'success',
             'data' => $reservations
         ]);
+    }
+    /**
+     * @OA\Get(
+     *     path="/api/reservations/upcoming",
+     *     summary="Obtenir les réservations futures",
+     *     tags={"Réservations"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Réservations futures récupérées avec succès"
+     *     )
+     * )
+     */
+    public function getReservationsProchaines()
+    {
+        $reservations = Reservation::with('salle', 'collaborateur')
+            ->where('statut', 'accepté')
+            ->where('date', '>=', now())
+            ->orderBy('date', 'heure_debut')
+            ->take(4)
+            ->get();
+
+        return response()->json($reservations);
+    }
+    // les 3 prochaines réservations pour le collaborateur
+    /**
+     * @OA\Get(
+     *     path="/api/reservations/upcoming/{id}",
+     *     summary="Obtenir les réservations futures pour un collaborateur",
+     *     tags={"Réservations"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID du collaborateur",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Réservations futures récupérées avec succès"
+     *     )
+     * )
+     */
+    public function avenir(string $id)
+    {
+        $reservations = Reservation::where('collaborateur_id', $id)
+            ->where('statut', 'accepté')
+            ->where('date', '>=', now())
+            ->orderBy('date')
+            ->take(5)
+            ->get();
+        return response()->json($reservations);
+    }
+
+    // les réservations récentes
+    public function recentes()
+    {
+        $reservations = Reservation::with('salle', 'collaborateur')
+            ->where('statut', 'accepté')
+            ->where('date', '>=', now())
+            ->orderBy('date')
+            ->take(4)
+            ->get();
+
+        return response()->json($reservations);
     }
 }

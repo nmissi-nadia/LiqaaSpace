@@ -30,45 +30,52 @@ const StatCard = ({ title, value, icon: Icon, color = 'primary' }) => (
 );
 
 const AdminDashboard = () => {
-      const [stats, setStats] = useState({
-        totalUsers: 0,
-        totalRooms: 0,
-        totalReservations: 0,
-        totalRevenue: 0
-      });
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalRooms: 0,
+    totalReservations: 0,
+    totalRevenue: 0
+  });
+  const [lastReservations, setLastReservations] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-      const [reservationsData, setReservationsData] = useState([]);
-      const [loading, setLoading] = useState(true);
-
-      useEffect(() => {
-        const fetchStats = async () => {
-          try {
-            // Récupérer les statistiques générales
-            const statsResponse = await api.get('api/stats');
-            setStats(statsResponse.data);
-
-            // Récupérer les données pour le graphique
-            const reservationsResponse = await api.get('api/reservations/stats');
-            setReservationsData(reservationsResponse.data);
-          } catch (error) {
-            console.error('Erreur lors du chargement des statistiques:', error);
-          } finally {
-            setLoading(false);
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        // Récupérer les statistiques générales
+        const statsResponse = await api.get('/api/stats', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
           }
-        };
+        });
+        setStats(statsResponse.data);
 
-        fetchStats();
-      }, []);
-
-      if (loading) {
-        return <Typography variant="h6">Chargement des statistiques...</Typography>;
+        // Récupérer les dernières réservations (4 prochaines)
+        const reservationsResponse = await api.get('api/reservations/prochaine', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+          }
+        });
+        console.log(reservationsResponse.data);
+        setLastReservations(reservationsResponse.data);
+      } catch (error) {
+        console.error('Erreur lors du chargement des statistiques:', error);
+      } finally {
+        setLoading(false);
       }
+    };
+    fetchStats();
+  }, []);
+
+  if (loading) {
+    return <Typography variant="h6">Chargement des statistiques...</Typography>;
+  }
 
   return (
     <Box>
       <Typography variant="h4" gutterBottom>Tableau de bord</Typography>
       <Grid container spacing={3}>
-      <StatCard 
+        <StatCard 
           title="Utilisateurs"
           value={stats.totalUsers}
           icon={PeopleIcon}
@@ -92,25 +99,38 @@ const AdminDashboard = () => {
           icon={StatsIcon}
           color="warning"
         />
-        
         {/* Dernières réservations */}
         <Grid item xs={12}>
           <Paper sx={{ p: 3, mt: 3 }}>
             <Typography variant="h6" gutterBottom>Dernières réservations</Typography>
-            {/* Ici vous pouvez ajouter un composant de tableau ou de liste */}
-
             <Table>
               <TableHead>
                 <TableRow>
                   <TableCell>Nom</TableCell>
                   <TableCell>Email</TableCell>
-                  <TableCell>Rôle</TableCell>
+                  <TableCell>Salle</TableCell>
+                  <TableCell>Date début</TableCell>
+                  <TableCell>Date fin</TableCell>
                   <TableCell>Statut</TableCell>
-                  <TableCell>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {/* Ici vous pouvez ajouter des lignes de données */}
+                {Array.isArray(lastReservations) && lastReservations.length > 0 ? (
+                  lastReservations.map((reservation, idx) => (
+                    <TableRow key={reservation.id || idx}>
+                      <TableCell>{reservation.user?.name || '-'}</TableCell>
+                      <TableCell>{reservation.user?.email || '-'}</TableCell>
+                      <TableCell>{reservation.salle?.nom || '-'}</TableCell>
+                      <TableCell>{reservation.date_debut ? new Date(reservation.date_debut).toLocaleString() : '-'}</TableCell>
+                      <TableCell>{reservation.date_fin ? new Date(reservation.date_fin).toLocaleString() : '-'}</TableCell>
+                      <TableCell>{reservation.statut || '-'}</TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6} align="center">Aucune réservation récente</TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </Paper>

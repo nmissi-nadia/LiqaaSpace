@@ -16,12 +16,13 @@ class Reservation extends Model
         'date_fin',
         'statut',
     ];
-        public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
+        
     public function salle()
     {
         return $this->belongsTo(Salle::class);
+    }
+    public function collaborateur()
+    {
+        return $this->belongsTo(User::class, 'collaborateur_id');
     }
 }

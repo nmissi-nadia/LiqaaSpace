@@ -1,168 +1,206 @@
-import { useState, useEffect } from 'react';
-import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from "react"
+import { Outlet, useNavigate, useLocation } from "react-router-dom"
+import { Layout, Menu, Avatar, Dropdown, Badge, Button } from "antd"
 import {
-  Dashboard as DashboardIcon,
-  People as PeopleIcon,
-  MeetingRoom as RoomIcon,
-  CalendarToday as CalendarIcon,
-  Menu as MenuIcon,
-  BarChart as StatsIcon,
-  Settings as SettingsIcon,
-  Close as CloseIcon,
-  Logout as LogoutIcon,
-} from '@mui/icons-material';
+  DashboardOutlined,
+  TeamOutlined,
+  HomeOutlined,
+  CalendarOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
+  UserOutlined,
+  BellOutlined,
+  LogoutOutlined,
+  CloseOutlined,
+} from "@ant-design/icons"
+import { Logo } from "../common/logo"
+
+const { Header, Sider, Content } = Layout
 
 const menuItems = [
-  { text: 'Tableau de bord', icon: <DashboardIcon />, path: '/admin/dashboard' },
-  { text: 'Utilisateurs', icon: <PeopleIcon />, path: '/users' },
-  { text: 'Salles', icon: <RoomIcon />, path: '/admin/salles' },
-  { text: 'Réservations', icon: <CalendarIcon />, path: '/admin/reservations' },
-  { text: 'Statistiques', icon: <StatsIcon />, path: '/admin/stats' },
-  { divider: true },
-  { text: 'Paramètres', icon: <SettingsIcon />, path: '/admin/settings' },
-  { text: 'Déconnexion', icon: <LogoutIcon />, path: '/logout' },
-];
+  { key: "1", text: "Tableau de bord", icon: <DashboardOutlined />, path: "/admin" },
+  { key: "2", text: "Utilisateurs", icon: <TeamOutlined />, path: "/admin/users" },
+  { key: "3", text: "Salles", icon: <HomeOutlined />, path: "/admin/salles" },
+  { key: "4", text: "Réservations", icon: <CalendarOutlined />, path: "/admin/reservations" },
+]
 
-const AdminLayout = ({ allowedRoles }) => {
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const location = useLocation();
-  const navigate = useNavigate();
+const AdminLayout = () => {
+  const [collapsed, setCollapsed] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+  const location = useLocation()
+  const navigate = useNavigate()
 
-  // Détecter la taille de l'écran
   useEffect(() => {
     const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 640);
-    };
-
-    checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-    return () => window.removeEventListener('resize', checkScreenSize);
-  }, []);
-
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
-
-  const handleNavigation = (path) => {
-    navigate(path);
-    if (isMobile) {
-      setMobileOpen(false);
+      setIsMobile(window.innerWidth < 768)
+      if (window.innerWidth >= 768) {
+        setMobileOpen(false)
+      }
     }
-  };
+
+    checkScreenSize()
+    window.addEventListener("resize", checkScreenSize)
+    return () => window.removeEventListener("resize", checkScreenSize)
+  }, [])
+
+  const toggleCollapsed = () => {
+    if (isMobile) {
+      setMobileOpen(!mobileOpen)
+    } else {
+      setCollapsed(!collapsed)
+    }
+  }
+
+  const getSelectedKey = () => {
+    const currentItem = menuItems.find((item) => item.path === location.pathname)
+    return currentItem?.key || "1"
+  }
 
   const getCurrentPageTitle = () => {
-    const currentItem = menuItems.find(item => item.path === location.pathname);
-    return currentItem?.text || 'Tableau de bord';
-  };
+    const currentItem = menuItems.find((item) => item.path === location.pathname)
+    return currentItem?.text || "Tableau de bord"
+  }
+
+  const handleNavigation = (path) => {
+    navigate(path)
+    if (isMobile) {
+      setMobileOpen(false)
+    }
+  }
+
+  const userMenuItems = [
+    {
+      key: "profile",
+      icon: <UserOutlined />,
+      label: "Mon Profil",
+    },
+    {
+      type: "divider",
+    },
+    {
+      key: "logout",
+      icon: <LogoutOutlined />,
+      label: "Déconnexion",
+      onClick: () => {
+        localStorage.removeItem("token")
+        localStorage.removeItem("user")
+        navigate("/auth")
+      },
+    },
+  ]
 
   return (
-    <div className="flex min-h-screen bg-stone-50">
-      {/* AppBar/Header */}
-      <header className="fixed top-0 left-0 right-0 bg-green-700 text-white shadow-lg z-50 h-16 sm:left-60">
-        <div className="flex items-center justify-between h-full px-4">
-          <div className="flex items-center">
-            <button
-              onClick={handleDrawerToggle}
-              className="p-2 rounded-md hover:bg-green-800 transition-colors mr-3 sm:hidden"
-              aria-label="Toggle menu"
-            >
-              <MenuIcon />
-            </button>
-            <h1 className="text-xl font-semibold">
-              {getCurrentPageTitle()}
-            </h1>
-          </div>
-        </div>
-      </header>
-
-      {/* Overlay pour mobile */}
+    <Layout className="min-h-screen bg-gradient-to-br from-slate-50 to-emerald-50">
+      {/* Mobile Overlay */}
       {isMobile && mobileOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40"
-          onClick={handleDrawerToggle}
-        />
+        <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setMobileOpen(false)} />
       )}
 
-      {/* Sidebar/Drawer */}
-      <aside
+      <Sider
+        trigger={null}
+        collapsible
+        collapsed={isMobile ? false : collapsed}
         className={`
-          fixed top-0 left-0 h-full bg-white shadow-lg z-40 w-60 transform transition-transform duration-300 ease-in-out
-          ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
-          sm:translate-x-0
+          bg-white/95 backdrop-blur-sm border-r border-emerald-200 shadow-xl shadow-emerald-500/10
+          ${isMobile ? "fixed z-50 h-full" : ""}
+          ${isMobile && !mobileOpen ? "hidden" : ""}
         `}
+        style={{
+          boxShadow: "4px 0 24px rgba(16, 185, 129, 0.1)",
+        }}
+        width={isMobile ? 280 : undefined}
       >
-        {/* Header du drawer */}
-        <div className="flex items-center justify-between h-16 px-4 bg-green-50 border-b border-green-100">
-          <div className="flex items-center space-x-3">
-            <div className="w-20 h-10 bg-green-700 rounded-lg flex items-center justify-center text-white font-bold text-lg">
-              Liqaa
+        <div className="flex items-center justify-between p-4">
+          <Logo collapsed={!isMobile && collapsed} />
+          {isMobile && (
+            <Button
+              type="text"
+              icon={<CloseOutlined />}
+              onClick={() => setMobileOpen(false)}
+              className="text-slate-600 hover:text-emerald-600"
+            />
+          )}
+        </div>
+
+        <Menu
+          mode="inline"
+          selectedKeys={[getSelectedKey()]}
+          className="bg-transparent border-none px-2"
+          items={menuItems.map((item) => ({
+            key: item.key,
+            icon: <span className="text-emerald-600">{item.icon}</span>,
+            label: (
+              <span
+                onClick={() => handleNavigation(item.path)}
+                className="text-slate-700 font-medium hover:text-emerald-600 transition-all duration-200 cursor-pointer"
+              >
+                {item.text}
+              </span>
+            ),
+            className: "mb-2 rounded-lg hover:bg-emerald-50",
+          }))}
+          theme="light"
+        />
+
+        {/* Admin section at bottom */}
+        <div className="absolute bottom-4 left-0 right-0 px-4">
+          <div className="bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-xl p-3 border border-emerald-200">
+            <div className="flex items-center space-x-3">
+              <Avatar size={32} className="bg-emerald-500 flex-shrink-0">
+                <UserOutlined />
+              </Avatar>
+              {(isMobile || !collapsed) && (
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-slate-700 truncate">Administrateur</p>
+                  <p className="text-xs text-slate-500 truncate">Panel Admin v1.0</p>
+                </div>
+              )}
             </div>
-            <span className="text-lg font-semibold text-green-800">Space</span>
           </div>
-          <button
-            onClick={handleDrawerToggle}
-            className="p-1 rounded-md hover:bg-green-100 transition-colors sm:hidden"
-          >
-            <CloseIcon className="text-green-700" />
-          </button>
         </div>
+      </Sider>
 
-        {/* Menu items */}
-        <nav className="mt-4">
-          <ul className="space-y-1 px-3">
-            {menuItems.map((item, index) => {
-              if (item.divider) {
-                return (
-                  <li key={`divider-${index}`} className="my-4">
-                    <hr className="border-stone-200" />
-                  </li>
-                );
-              }
-
-              const isActive = location.pathname === item.path;
-              return (
-                <li key={item.text}>
-                  <button
-                    onClick={() => handleNavigation(item.path)}
-                    className={`
-                      w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-200 text-left
-                      ${isActive 
-                        ? 'bg-green-100 text-green-800 border-r-4 border-green-600 font-medium shadow-sm' 
-                        : 'text-stone-700 hover:bg-stone-100 hover:text-stone-900'
-                      }
-                    `}
-                  >
-                    <span className={`text-xl ${isActive ? 'text-green-700' : 'text-stone-500'}`}>
-                      {item.icon}
-                    </span>
-                    <span>{item.text}</span>
-                  </button>
-                </li>
-              );
+      <Layout className="bg-transparent" style={{ marginLeft: isMobile ? 0 : undefined }}>
+        <Header className="px-6 bg-white/80 backdrop-blur-sm border-b border-emerald-200 flex items-center justify-between shadow-sm">
+          <div className="flex items-center space-x-4">
+            {React.createElement(isMobile ? MenuFoldOutlined : collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
+              className:
+                "text-emerald-600 text-lg cursor-pointer p-2 rounded-lg hover:bg-emerald-50 transition-all duration-200",
+              onClick: toggleCollapsed,
             })}
-          </ul>
-        </nav>
-
-        {/* Footer du sidebar */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 bg-stone-50 border-t border-stone-200">
-          <div className="text-center text-xs text-stone-500">
-            <p className="font-medium">Panel Admin</p>
-            <p>Version 1.0</p>
+            <div>
+              <h1 className="text-slate-800 font-bold text-xl">{getCurrentPageTitle()}</h1>
+              <p className="text-slate-500 text-sm">Administration</p>
+            </div>
           </div>
-        </div>
-      </aside>
 
-      {/* Main content */}
-      <main className="flex-1 transition-all duration-300 ease-in-out pt-16 sm:ml-60">
-        <div className="p-6 bg-white min-h-screen">
-          <div className="max-w-7xl mx-auto">
+          <div className="flex items-center space-x-4">
+            <Badge count={5} size="small">
+              <BellOutlined className="text-slate-600 text-lg cursor-pointer hover:text-emerald-600 transition-colors" />
+            </Badge>
+
+            <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" arrow>
+              <div className="flex items-center space-x-2 cursor-pointer hover:bg-emerald-50 rounded-lg px-3 py-2 transition-all duration-200">
+                <Avatar size={32} className="bg-emerald-500">
+                  <UserOutlined />
+                </Avatar>
+                <div className="hidden sm:block">
+                  <p className="text-sm font-medium text-slate-700">Admin</p>
+                </div>
+              </div>
+            </Dropdown>
+          </div>
+        </Header>
+
+        <Content className="m-6">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl shadow-emerald-500/5 border border-emerald-100 p-6 min-h-[calc(100vh-8rem)]">
             <Outlet />
           </div>
-        </div>
-      </main>
-    </div>
-  );
-};
+        </Content>
+      </Layout>
+    </Layout>
+  )
+}
 
-export default AdminLayout;
+export default AdminLayout

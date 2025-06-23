@@ -180,7 +180,7 @@ const DetailsSalle = () => {
           <Row gutter={[24, 24]}>
             <Col xs={24} md={14}>
               <Image
-                src={salle.image_url || 'https://via.placeholder.com/800x500?text=Sans+image'}
+                src={salle.image_url || 'https://via.placeholder.com/1000x500?text=Sans+image'}
                 alt={salle.nom}
                 style={{ width: '100%', borderRadius: '8px' }}
                 preview={false}
