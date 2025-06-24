@@ -51,7 +51,7 @@ const AdminDashboard = () => {
         setStats(statsResponse.data);
 
         // Récupérer les dernières réservations (4 prochaines)
-        const reservationsResponse = await api.get('api/reservations/prochaine', {
+        const reservationsResponse = await api.get('api/reservations/prochaines', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('access_token')}`
           }
@@ -121,8 +121,8 @@ const AdminDashboard = () => {
                       <TableCell>{reservation.user?.name || '-'}</TableCell>
                       <TableCell>{reservation.user?.email || '-'}</TableCell>
                       <TableCell>{reservation.salle?.nom || '-'}</TableCell>
-                      <TableCell>{reservation.date_debut ? new Date(reservation.date_debut).toLocaleString() : '-'}</TableCell>
-                      <TableCell>{reservation.date_fin ? new Date(reservation.date_fin).toLocaleString() : '-'}</TableCell>
+                      <TableCell>{reservation.heure_debut ? new Date(reservation.heure_debut).toLocaleString() : '-'}</TableCell>
+                      <TableCell>{reservation.heure_fin ? new Date(reservation.heure_fin).toLocaleString() : '-'}</TableCell>
                       <TableCell>{reservation.statut || '-'}</TableCell>
                     </TableRow>
                   ))

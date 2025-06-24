@@ -13,70 +13,72 @@ use App\Http\Controllers\API\StatsController;
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
+| Toutes les routes sont préfixées par /api
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-Route::get('/sanctum/csrf-cookie', function () {
-    return response()->noContent();
-});
-
-// route vers register
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login'])->name('login');
-Route::post('/forgot-password', [AuthController::class, 'Mpsasseoubli'])->name('password.forgot');
-Route::post('/reset-password', [AuthController::class, 'resetMps'])->name('password.reset');
-Route::get('/users', [UserController::class, 'index']);
-Route::get('/users/{id}', [UserController::class, 'show']);
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/logout', [AuthController::class,'logout']);
-    Route::post('/change-password', [AuthController::class,'changeMps']);
-    Route::apiResource('salles', SalleController::class);
-    Route::apiResource('reservations', ReservationController::class);
-    Route::apiResource('disponibilites', DisponibiliteController::class);
-    Route::get('/stats/responsable', [StatsController::class, 'getStatsResponsable']);
-    Route::get('/stats/collaborateur', [StatsController::class, 'getStatsUser']);
-
-   
+// Routes publiques
+Route::middleware('web')->group(function () {
+    Route::get('/sanctum/csrf-cookie', fn () => response()->noContent());
     
+    // Authentification
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login'])->name('login');
+    Route::post('/forgot-password', [AuthController::class, 'Mpsasseoubli'])->name('password.forgot');
+    Route::post('/reset-password', [AuthController::class, 'resetMps'])->name('password.reset');
+    
+    // Test de connexion
+    Route::get('/test', fn () => response()->json(['message' => 'Connexion OK']));
 });
-Route::get('/test', function () {
-    return response()->json(['message' => 'Connexion OK']);
-});
-// les reservations recentes
-Route::get('/reservations/recent', [ReservationController::class, 'recentes']);
-// api/reservations/stats
-Route::get('/reservations/stats', [ReservationController::class, 'getStats']);
-// api/reservations/stats/user/{id}
-Route::get('/reservations/collaborateur/{id}', [ReservationController::class, 'getReservationsByUser']);
-// route vers stats
-Route::get('/stats', [StatsController::class, 'getStatsAdmin']);
-// stats de collaborateur
-Route::get('/stats/collaborateur', [StatsController::class, 'getStatsUser']);
 
-// Routes pour les salles
-Route::middleware('auth:sanctum')->group(function () {
+// Routes protégées par authentification
+Route::middleware(['auth:sanctum'])->group(function () {
+    // Utilisateur courant
+    Route::get('/user', fn (Request $request) => $request->user());
+    
+    // Gestion du profil utilisateur
+    Route::prefix('profile')->group(function () {
+        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::post('/change-password', [AuthController::class, 'changeMps']);
+    });
+    
+    // Gestion des salles
     Route::prefix('salles')->group(function () {
         Route::get('/', [SalleController::class, 'index']);
-        Route::get('/disponibles', [SalleController::class, 'getSallesDisponibles']);
+        Route::get('/disponibles', [SalleController::class, 'getdispo']);
         Route::get('/top5', [SalleController::class, 'getTop5Salles']);
         Route::post('/', [SalleController::class, 'store']);
         Route::get('/{id}', [SalleController::class, 'show']);
         Route::put('/{id}', [SalleController::class, 'update']);
         Route::delete('/{id}', [SalleController::class, 'destroy']);
     });
+    
+
+    // Gestion des réservations
+    Route::prefix('reservations')->group(function () {
+        Route::get('/', [ReservationController::class, 'index']);
+        Route::get('/recent', [ReservationController::class, 'recentes']);
+        Route::get('/prochaines', [ReservationController::class, 'getReservationsProchaines']);
+        Route::get('/avenir/{id}', [ReservationController::class, 'avenir']);
+        Route::get('/stats', [ReservationController::class, 'getStats']);
+        Route::get('/collaborateur', [ReservationController::class, 'getReservationsByUser']);
+        Route::post('/', [ReservationController::class, 'store']);
+        Route::get('/{id}', [ReservationController::class, 'show']);
+        Route::put('/{id}', [ReservationController::class, 'update']);
+        Route::delete('/{id}', [ReservationController::class, 'destroy']);
+    });
+    // Gestion des disponibilités
+    Route::apiResource('disponibilites', DisponibiliteController::class);
+    
+    // Statistiques
+    Route::prefix('stats')->group(function () {
+        Route::get('/', [StatsController::class, 'getStatsAdmin']);
+        Route::get('/responsable', [StatsController::class, 'getStatsResponsable']);
+        Route::get('/collaborateur', [StatsController::class, 'getStatsUser']);
+    });
+    
+    // Gestion des utilisateurs (admin)
+    Route::prefix('users')->group(function () {
+        Route::get('/', [UserController::class, 'index']);
+        Route::get('/{id}', [UserController::class, 'show']);
+    });
 });
-// Réservations
-Route::get('/reservations/prochaine', [ReservationController::class, 'getReservationsProchaines']);
-    Route::get('/salles/top5', [SalleController::class, 'getTop5Salles']);
-    Route::get('/reservations/avenir/{id}', [ReservationController::class, 'avenir']);
-    Route::get('/salles/disponibles', [SalleController::class, 'getdispo']);
-
-
-

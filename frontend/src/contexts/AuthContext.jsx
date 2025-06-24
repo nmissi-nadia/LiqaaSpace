@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }) => {
       setError(null);
       
       // Récupérer le token CSRF
-      await api.get('/sanctum/csrf-cookie');
+      await api.get('/sanctum/csrf-cookie',{withCredentials: true});
       
       // Se connecter
       const response = await api.post('api/login', { 

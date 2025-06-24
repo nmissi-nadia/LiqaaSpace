@@ -1,420 +1,565 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from "react"
 import {
-  Box,
-  Typography,
-  Paper,
   Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Button,
-  IconButton,
-  Chip,
-  TextField,
-  MenuItem,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  DialogContentText,
-  Grid,
-  Divider,
+  Tag,
+  Input,
+  Select,
+  Modal,
   Avatar,
+  Space,
   Tooltip,
-  CircularProgress
-} from '@mui/material';
+  Card,
+  Row,
+  Col,
+  Typography,
+  Descriptions,
+  message,
+  Badge,
+} from "antd"
 import {
-  Search as SearchIcon,
-  Check as ApproveIcon,
-  Close as RejectIcon,
-  Visibility as ViewIcon,
-  Event as EventIcon,
-  Person as PersonIcon,
-  MeetingRoom as RoomIcon,
-  AccessTime as TimeIcon,
-  EventAvailable as AvailableIcon,
-  EventBusy as BusyIcon,
-  Pending as PendingIcon
-} from '@mui/icons-material';
-import { format, parseISO } from 'date-fns';
-import { fr } from 'date-fns/locale';
-import api from '../../services/api';
+  SearchOutlined,
+  CheckOutlined,
+  CloseOutlined,
+  EyeOutlined,
+  CalendarOutlined,
+  UserOutlined,
+  HomeOutlined,
+  ClockCircleOutlined,
+  CheckCircleOutlined,
+  ExclamationCircleOutlined,
+  CloseCircleOutlined,
+} from "@ant-design/icons"
+import { format, parseISO } from "date-fns"
+import { fr } from "date-fns/locale"
+import axios from "axios"
 
-const statusColors = {
-  pending: 'warning',
-  approved: 'success',
-  rejected: 'error'
-};
+const { Title, Text } = Typography
+const { Option } = Select
 
-const statusIcons = {
-  pending: <PendingIcon />,
-  approved: <AvailableIcon />,
-  rejected: <BusyIcon />
-};
+const statusConfig = {
+  "en attente": {
+    color: "orange",
+    icon: <ExclamationCircleOutlined />,
+    text: "En attente",
+  },
+  "accepté": {
+    color: "green",
+    icon: <CheckCircleOutlined />,
+    text: "Accepté",
+  },
+  "refusé": {
+    color: "red",
+    icon: <CloseCircleOutlined />,
+    text: "Refusé",
+  },
+  "confirmé": {
+    color: "blue",
+    icon: <CheckCircleOutlined />,
+    text: "Confirmé",
+  },
+  "annulé": {
+    color: "default",
+    icon: <CloseCircleOutlined />,
+    text: "Annulé",
+  },
+  "approuvee": {
+    color: "green",
+    icon: <CheckCircleOutlined />,
+    text: "Approuvée",
+  },
+  "rejetee": {
+    color: "red",
+    icon: <CloseCircleOutlined />,
+    text: "Rejetée",
+  },
+}
 
 const ReservationsManagement = () => {
-  const [reservations, setReservations] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedReservation, setSelectedReservation] = useState(null);
-  const [openDialog, setOpenDialog] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [reservations, setReservations] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [selectedReservation, setSelectedReservation] = useState(null)
+  const [modalVisible, setModalVisible] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [statusFilter, setStatusFilter] = useState("all")
+  const [actionLoading, setActionLoading] = useState({})
 
   useEffect(() => {
-    fetchReservations();
-  }, []);
+    fetchReservations()
+  }, [])
 
   const fetchReservations = async () => {
     try {
-      const response = await api.get('/api/reservations', {
+      setLoading(true)
+      const response = await axios.get("http://localhost:8000/api/reservations", {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      console.log(response.data);
-      setReservations(response.data);
-      setLoading(false);
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+      })
+      setReservations(response.data)
     } catch (error) {
-      console.error('Erreur lors du chargement des réservations:', error);
-      setLoading(false);
+      console.error("Erreur lors du chargement des réservations:", error)
+      message.error("Erreur lors du chargement des réservations")
+    } finally {
+      setLoading(false)
     }
-  };
-
-  const handleStatusUpdate = async (id, status) => {
-    try {
-      await api.put(`/api/reservations/${id}/status`, { status }, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      fetchReservations();
-      if (selectedReservation?.id === id) {
-        setSelectedReservation({ ...selectedReservation, status });
-      }
-    } catch (error) {
-      console.error('Erreur lors de la mise à jour du statut:', error);
-    }
-  };
-
-  const handleOpenDialog = (reservation) => {
-    setSelectedReservation(reservation);
-    setOpenDialog(true);
-  };
-
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
-    setSelectedReservation(null);
-  };
-
-  const filteredReservations = reservations
-    .filter(reservation => 
-      (reservation.salle?.nom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-       reservation.collaborateur?.name?.toLowerCase().includes(searchTerm.toLowerCase())) &&
-      (statusFilter === 'all' || reservation.status === statusFilter)
-    )
-    .sort((a, b) => new Date(b.date + ' ' + b.heure_debut) - new Date(a.date + ' ' + a.heure_fin));
-
-  const formatDate = (dateString) => {
-    return format(parseISO(dateString), 'PPPp', { locale: fr });
-  };
-
-  const getTimeRange = (start, end) => {
-    return `${format(parseISO(start), 'HH:mm')} - ${format(parseISO(end), 'HH:mm')}`;
-  };
-
-  if (loading) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
-        <CircularProgress />
-      </Box>
-    );
   }
 
+  const buildUpdatePayload = (record, newStatut) => ({
+    salle_id: record.salle?.id,
+    collaborateur_id: record.collaborateur?.id,
+    heure_debut: record.heure_debut || record.date,
+    heure_fin: record.heure_fin || record.date,
+    statut: newStatut,
+  })
+
+  const handleStatusUpdate = async (record, newStatut) => {
+    try {
+      setActionLoading((prev) => ({ ...prev, [record.id]: true }))
+      await axios.put(
+        `http://localhost:8000/api/reservations/${record.id}`,
+        buildUpdatePayload(record, newStatut),
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        }
+      )
+      message.success(`Statut changé en ${newStatut}`)
+      fetchReservations()
+      if (selectedReservation?.id === record.id) {
+        setSelectedReservation({ ...selectedReservation, statut: newStatut })
+      }
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour du statut:", error)
+      message.error("Erreur lors de la mise à jour du statut")
+    } finally {
+      setActionLoading((prev) => ({ ...prev, [record.id]: false }))
+    }
+  }
+
+  const handleOpenModal = (reservation) => {
+    setSelectedReservation(reservation)
+    setModalVisible(true)
+  }
+
+  const handleCloseModal = () => {
+    setModalVisible(false)
+    setSelectedReservation(null)
+  }
+
+  const filteredReservations = reservations
+    .filter(
+      (reservation) =>
+        (reservation.salle?.nom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          reservation.collaborateur?.name?.toLowerCase().includes(searchTerm.toLowerCase())) &&
+        (statusFilter === "all" || reservation.statut === statusFilter),
+    )
+    .sort((a, b) => new Date(b.heure_debut || b.date) - new Date(a.heure_debut || a.date))
+
+  const formatDate = (dateString) => {
+    try {
+      return format(parseISO(dateString), "PPP", { locale: fr })
+    } catch (error) {
+      return dateString
+    }
+  }
+
+  const formatTime = (timeString) => {
+    try {
+      return format(parseISO(`2000-01-01T${timeString}`), "HH:mm")
+    } catch (error) {
+      return timeString
+    }
+  }
+
+  const getTimeRange = (start, end) => {
+    return `${formatTime(start)} - ${formatTime(end)}`
+  }
+
+  const columns = [
+    {
+      title: "Salle",
+      dataIndex: ["salle", "nom"],
+      key: "salle",
+      render: (text, record) => (
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <HomeOutlined style={{ color: "#10b981" }} />
+          <Text strong>{record.salle?.nom}</Text>
+        </div>
+      ),
+    },
+    {
+      title: "Demandeur",
+      dataIndex: ["collaborateur", "name"],
+      key: "collaborateur",
+      render: (text, record) => (
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <Avatar size={32} className="bg-emerald-500">
+            {record.collaborateur?.name?.charAt(0)?.toUpperCase() || "?"}
+          </Avatar>
+          <div>
+            <Text strong>{record.collaborateur?.name}</Text>
+            <br />
+            <Text type="secondary" style={{ fontSize: "12px" }}>
+              {record.collaborateur?.email}
+            </Text>
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: "Date et heure",
+      dataIndex: "heure_debut",
+      key: "heure_debut",
+      render: (text, record) => (
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <ClockCircleOutlined style={{ color: "#10b981" }} />
+          <div>
+            <Text>{formatDate(record.heure_debut || record.date)}</Text>
+            <br />
+            <Text type="secondary" style={{ fontSize: "12px" }}>
+              {getTimeRange(record.heure_debut, record.heure_fin)}
+            </Text>
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: "Motif",
+      dataIndex: "motif",
+      key: "motif",
+      render: (text) => (
+        <Tooltip title={text}>
+          <Text
+            style={{
+              maxWidth: "200px",
+              display: "block",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {text}
+          </Text>
+        </Tooltip>
+      ),
+    },
+    {
+      title: "Statut",
+      dataIndex: "statut",
+      key: "statut",
+      align: "center",
+      render: (statut) => {
+        const config = statusConfig[statut] || statusConfig["en attente"]
+        return (
+          <Tag icon={config.icon} color={config.color}>
+            {config.text}
+          </Tag>
+        )
+      },
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      align: "right",
+      render: (_, record) => (
+        <Space>
+          <Tooltip title="Voir les détails">
+            <Button
+              type="text"
+              icon={<EyeOutlined />}
+              onClick={() => handleOpenModal(record)}
+              style={{ color: "#10b981" }}
+            />
+          </Tooltip>
+          <Select
+            value={record.statut}
+            style={{ width: 120 }}
+            onChange={(value) => handleStatusUpdate(record, value)}
+            loading={actionLoading[record.id]}
+          >
+            <Option value="en attente">En attente</Option>
+            <Option value="accepté">Accepté</Option>
+            <Option value="refusé">Refusé</Option>
+          </Select>
+        </Space>
+      ),
+    },
+  ]
+
+  const getStatusCounts = () => {
+    const counts = {
+      total: reservations.length,
+      pending: reservations.filter((r) => r.statut === "en attente").length,
+      approved: reservations.filter((r) => r.statut === "accepté").length,
+      rejected: reservations.filter((r) => r.statut === "refusé").length,
+    }
+    return counts
+  }
+
+  const statusCounts = getStatusCounts()
+
   return (
-    <Box>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h4" gutterBottom>
+    <div
+      style={{
+        padding: "24px",
+        background: "linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)",
+        minHeight: "100vh",
+      }}
+    >
+      {/* En-tête avec statistiques */}
+      <div
+        style={{
+          background: "rgba(255, 255, 255, 0.95)",
+          borderRadius: "16px",
+          padding: "24px",
+          marginBottom: "24px",
+          boxShadow: "0 8px 32px rgba(16, 185, 129, 0.1)",
+          backdropFilter: "blur(10px)",
+        }}
+      >
+        <Title
+          level={2}
+          style={{
+            margin: "0 0 16px 0",
+            background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            fontSize: "28px",
+            fontWeight: "bold",
+          }}
+        >
           Gestion des Réservations
-        </Typography>
-      </Box>
+        </Title>
 
-      <Paper sx={{ mb: 3, p: 2 }}>
-        <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} md={6}>
-            <Box display="flex" alignItems="center">
-              <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />
-              <TextField
-                fullWidth
-                variant="outlined"
-                placeholder="Rechercher par salle ou demandeur..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                size="small"
-              />
-            </Box>
-          </Grid>
-          <Grid item xs={12} md={3}>
-            <TextField
-              select
-              fullWidth
-              label="Filtrer par statut"
+        <Row gutter={[16, 16]}>
+          <Col xs={12} sm={6}>
+            <Card size="small" className="text-center">
+              <Badge count={statusCounts.total} style={{ backgroundColor: "#10b981" }}>
+                <div style={{ padding: "8px" }}>
+                  <Text strong>Total</Text>
+                </div>
+              </Badge>
+            </Card>
+          </Col>
+          <Col xs={12} sm={6}>
+            <Card size="small" className="text-center">
+              <Badge count={statusCounts.pending} style={{ backgroundColor: "#f59e0b" }}>
+                <div style={{ padding: "8px" }}>
+                  <Text strong>En attente</Text>
+                </div>
+              </Badge>
+            </Card>
+          </Col>
+          <Col xs={12} sm={6}>
+            <Card size="small" className="text-center">
+              <Badge count={statusCounts.approved} style={{ backgroundColor: "#10b981" }}>
+                <div style={{ padding: "8px" }}>
+                  <Text strong>Approuvées</Text>
+                </div>
+              </Badge>
+            </Card>
+          </Col>
+          <Col xs={12} sm={6}>
+            <Card size="small" className="text-center">
+              <Badge count={statusCounts.rejected} style={{ backgroundColor: "#ef4444" }}>
+                <div style={{ padding: "8px" }}>
+                  <Text strong>Rejetées</Text>
+                </div>
+              </Badge>
+            </Card>
+          </Col>
+        </Row>
+      </div>
+
+      {/* Filtres et recherche */}
+      <Card
+        style={{
+          marginBottom: "24px",
+          borderRadius: "16px",
+          background: "rgba(255, 255, 255, 0.95)",
+          backdropFilter: "blur(10px)",
+          boxShadow: "0 8px 32px rgba(16, 185, 129, 0.1)",
+        }}
+      >
+        <Row gutter={[16, 16]} align="middle">
+          <Col xs={24} md={12}>
+            <Input
+              placeholder="Rechercher par salle ou demandeur..."
+              prefix={<SearchOutlined style={{ color: "#10b981" }} />}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{ borderRadius: "8px" }}
+            />
+          </Col>
+          <Col xs={24} md={6}>
+            <Select
+              placeholder="Filtrer par statut"
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              size="small"
+              onChange={setStatusFilter}
+              style={{ width: "100%", borderRadius: "8px" }}
             >
-              <MenuItem value="all">Tous les statuts</MenuItem>
-              <MenuItem value="en attente">En attente</MenuItem>
-              <MenuItem value="approuvee">Approuvées</MenuItem>
-              <MenuItem value="rejetee">Rejetées</MenuItem>
-            </TextField>
-          </Grid>
-          <Grid item xs={12} md={3}>
-            <Box display="flex" justifyContent="flex-end">
-              <Button
-                variant="outlined"
-                startIcon={<EventIcon />}
-                onClick={() => {/* Ajouter une fonction pour afficher le calendrier */}}
-              >
-                Voir le calendrier
-              </Button>
-            </Box>
-          </Grid>
-        </Grid>
-      </Paper>
+              <Option value="all">Tous les statuts</Option>
+              <Option value="en attente">En attente</Option>
+              <Option value="accepté">Accepté</Option>
+              <Option value="refusé">Refusé</Option>
+            </Select>
+          </Col>
+          <Col xs={24} md={6}>
+            <Button
+              type="primary"
+              icon={<CalendarOutlined />}
+              style={{
+                width: "100%",
+                borderRadius: "8px",
+                background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                border: "none",
+              }}
+            >
+              Voir le calendrier
+            </Button>
+          </Col>
+        </Row>
+      </Card>
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Salle</TableCell>
-              <TableCell>Demandeur</TableCell>
-              <TableCell>Date et heure</TableCell>
-              <TableCell>Motif</TableCell>
-              <TableCell align="center">Statut</TableCell>
-              <TableCell align="right">Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredReservations.map((reservation) => (
-              <TableRow key={reservation.id} hover>
-                <TableCell>
-                  <Box display="flex" alignItems="center">
-                    <RoomIcon color="action" sx={{ mr: 1 }} />
-                    {reservation.salle?.nom}
-                  </Box>
-                </TableCell>
-                <TableCell>
-                  <Box display="flex" alignItems="center">
-                    <Avatar 
-                      src={reservation.collaborateur?.avatar} 
-                      sx={{ width: 32, height: 32, mr: 1 }}
-                    >
-                      {reservation.collaborateur?.name?.charAt(0)}
-                    </Avatar>
-                    {reservation.collaborateur?.name}
-                  </Box>
-                </TableCell>
-                <TableCell>
-                  <Box display="flex" alignItems="center">
-                    <TimeIcon fontSize="small" sx={{ mr: 1, color: 'text.secondary' }} />
-                    <Box>
-                      <div>{formatDate(reservation.date)}</div>
-                      <div style={{ fontSize: '0.875rem', color: 'text.secondary' }}>
-                        {getTimeRange(reservation.heure_debut, reservation.heure_fin)}
-                      </div>
-                    </Box>
-                  </Box>
-                </TableCell>
-                <TableCell>
-                  <Tooltip title={reservation.purpose} arrow>
-                    <Box sx={{ 
-                      maxWidth: 200, 
-                      whiteSpace: 'nowrap', 
-                      overflow: 'hidden', 
-                      textOverflow: 'ellipsis' 
-                    }}>
-                      {reservation.purpose}
-                    </Box>
-                  </Tooltip>
-                </TableCell>
-                <TableCell align="center">
-                  <Chip
-                    icon={statusIcons[reservation.status]}
-                    label={reservation.status === 'en attente' ? 'En attente' : 
-                           reservation.status === 'approuvee' ? 'Approuvée' : 'Rejetée'}
-                    color={statusColors[reservation.status]}
-                    size="small"
-                  />
-                </TableCell>
-                <TableCell align="right">
-                  <Tooltip title="Voir les détails" arrow>
-                    <IconButton onClick={() => handleOpenDialog(reservation)}>
-                      <ViewIcon color="info" />
-                    </IconButton>
-                  </Tooltip>
-                  {reservation.status === 'en attente' && (
-                    <>
-                      <Tooltip title="Approuver" arrow>
-                        <IconButton 
-                          onClick={() => handleStatusUpdate(reservation.id, 'approuvee')}
-                        >
-                          <ApproveIcon color="success" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Rejeter" arrow>
-                        <IconButton 
-                          onClick={() => handleStatusUpdate(reservation.id, 'rejetee')}
-                        >
-                          <RejectIcon color="error" />
-                        </IconButton>
-                      </Tooltip>
-                    </>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      {/* Table des réservations */}
+      <Card
+        style={{
+          borderRadius: "16px",
+          background: "rgba(255, 255, 255, 0.95)",
+          backdropFilter: "blur(10px)",
+          boxShadow: "0 8px 32px rgba(16, 185, 129, 0.1)",
+        }}
+      >
+        <Table
+          columns={columns}
+          dataSource={filteredReservations}
+          rowKey="id"
+          loading={loading}
+          pagination={{
+            pageSize: 10,
+            showSizeChanger: true,
+            showQuickJumper: true,
+            showTotal: (total, range) => `${range[0]}-${range[1]} sur ${total} réservations`,
+          }}
+          scroll={{ x: 800 }}
+          rowClassName="hover:bg-emerald-50"
+        />
+      </Card>
 
-      {/* Détails de la réservation */}
-      <Dialog 
-        open={openDialog} 
-        onClose={handleCloseDialog} 
-        maxWidth="sm" 
-        fullWidth
+      {/* Modal de détails */}
+      <Modal
+        title={
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <CalendarOutlined style={{ color: "#10b981" }} />
+            <span>Détails de la réservation</span>
+          </div>
+        }
+        open={modalVisible}
+        onCancel={handleCloseModal}
+        width={600}
+        footer={
+          selectedReservation
+            ? [
+                <Select
+                  key="statut"
+                  value={selectedReservation.statut}
+                  style={{ width: 160, marginRight: 8 }}
+                  onChange={(value) => handleStatusUpdate(selectedReservation, value)}
+                  loading={actionLoading[selectedReservation.id]}
+                >
+                  <Option value="en attente">En attente</Option>
+                  <Option value="accepté">Accepté</Option>
+                  <Option value="refusé">Refusé</Option>
+                </Select>,
+                <Button key="close" onClick={handleCloseModal}>
+                  Fermer
+                </Button>,
+              ]
+            : null
+        }
       >
         {selectedReservation && (
-          <>
-            <DialogTitle>
-              <Box display="flex" alignItems="center">
-                <EventIcon color="primary" sx={{ mr: 1 }} />
-                Détails de la réservation
-              </Box>
-            </DialogTitle>
-            <DialogContent>
-              <Grid container spacing={2} sx={{ mt: 1 }}>
-                <Grid item xs={12}>
-                  <Typography variant="subtitle2" color="textSecondary">
-                    Salle
-                  </Typography>
-                  <Typography variant="body1">
-                    {selectedReservation.room?.nom} (Capacité: {selectedReservation.room?.capacite})
-                  </Typography>
-                </Grid>
+          <div style={{ padding: "16px 0" }}>
+            <Descriptions column={1} bordered size="small">
+              <Descriptions.Item
+                label={
+                  <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    <HomeOutlined /> Salle
+                  </span>
+                }
+              >
+                <div>
+                  <Text strong>{selectedReservation.salle?.nom}</Text>
+                  <br />
+                  <Text type="secondary">Capacité: {selectedReservation.salle?.capacite} personnes</Text>
+                </div>
+              </Descriptions.Item>
 
-                <Grid item xs={12}>
-                  <Typography variant="subtitle2" color="textSecondary">
-                    Demandeur
-                  </Typography>
-                  <Box display="flex" alignItems="center" mt={1}>
-                    <Avatar 
-                      src={selectedReservation.user?.avatar} 
-                      sx={{ width: 40, height: 40, mr: 2 }}
-                    >
-                      {selectedReservation.user?.name?.charAt(0)}
-                    </Avatar>
-                    <Box>
-                      <Typography variant="body1">
-                        {selectedReservation.user?.name}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        {selectedReservation.user?.email}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Grid>
+              <Descriptions.Item
+                label={
+                  <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    <UserOutlined /> Demandeur
+                  </span>
+                }
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                  <Avatar size={40} className="bg-emerald-500">
+                    {selectedReservation.collaborateur?.name?.charAt(0)?.toUpperCase() || "?"}
+                  </Avatar>
+                  <div>
+                    <Text strong>{selectedReservation.collaborateur?.name}</Text>
+                    <br />
+                    <Text type="secondary">{selectedReservation.collaborateur?.email}</Text>
+                  </div>
+                </div>
+              </Descriptions.Item>
 
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="subtitle2" color="textSecondary">
-                    Date
-                  </Typography>
-                  <Typography variant="body1">
-                    {formatDate(selectedReservation.date)}
-                  </Typography>
-                </Grid>
+              <Descriptions.Item
+                label={
+                  <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    <CalendarOutlined /> Date
+                  </span>
+                }
+              >
+                {formatDate(selectedReservation.heure_debut || selectedReservation.date)}
+              </Descriptions.Item>
 
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="subtitle2" color="textSecondary">
-                    Horaire
-                  </Typography>
-                  <Typography variant="body1">
-                    {getTimeRange(selectedReservation.heure_debut, selectedReservation.heure_fin)}
-                  </Typography>
-                </Grid>
+              <Descriptions.Item
+                label={
+                  <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    <ClockCircleOutlined /> Horaire
+                  </span>
+                }
+              >
+                {getTimeRange(selectedReservation.heure_debut, selectedReservation.heure_fin)}
+              </Descriptions.Item>
 
-                <Grid item xs={12}>
-                  <Typography variant="subtitle2" color="textSecondary">
-                    Motif
-                  </Typography>
-                  <Typography variant="body1" paragraph>
-                    {selectedReservation.purpose}
-                  </Typography>
-                </Grid>
+              <Descriptions.Item label="Motif">{selectedReservation.motif}</Descriptions.Item>
 
-                <Grid item xs={12}>
-                  <Typography variant="subtitle2" color="textSecondary">
-                    Statut
-                  </Typography>
-                  <Box>
-                    <Chip
-                      icon={statusIcons[selectedReservation.status]}
-                      label={selectedReservation.status === 'active' ? 'En attente' : 
-                             selectedReservation.status === 'approved' ? 'Approuvée' : 'Rejetée'}
-                      color={statusColors[selectedReservation.status]}
-                      sx={{ mt: 1 }}
-                    />
-                  </Box>
-                </Grid>
+              <Descriptions.Item label="Statut">
+                {(() => {
+                  const config = statusConfig[selectedReservation.statut] || statusConfig["en attente"]
+                  return (
+                    <Tag icon={config.icon} color={config.color}>
+                      {config.text}
+                    </Tag>
+                  )
+                })()}
+              </Descriptions.Item>
 
-                {selectedReservation.notes && (
-                  <Grid item xs={12}>
-                    <Typography variant="subtitle2" color="textSecondary">
-                      Notes
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {selectedReservation.notes}
-                    </Typography>
-                  </Grid>
-                )}
-              </Grid>
-            </DialogContent>
-            <DialogActions>
-              {selectedReservation.status === 'en attente' && (
-                <>
-                  <Button
-                    startIcon={<ApproveIcon />}
-                    onClick={() => {
-                      handleStatusUpdate(selectedReservation.id, 'approved');
-                      handleCloseDialog();
-                    }}
-                    color="success"
-                  >
-                    Approuver
-                  </Button>
-                  <Button
-                    startIcon={<RejectIcon />}
-                    onClick={() => {
-                      handleStatusUpdate(selectedReservation.id, 'rejected');
-                      handleCloseDialog();
-                    }}
-                    color="error"
-                  >
-                    Rejeter
-                  </Button>
-                </>
+              {selectedReservation.notes && (
+                <Descriptions.Item label="Notes">
+                  <Text type="secondary">{selectedReservation.notes}</Text>
+                </Descriptions.Item>
               )}
-              <Button onClick={handleCloseDialog} color="primary">
-                Fermer
-              </Button>
-            </DialogActions>
-          </>
+            </Descriptions>
+          </div>
         )}
-      </Dialog>
-    </Box>
-  );
-};
+      </Modal>
+    </div>
+  )
+}
 
-export default ReservationsManagement;
+export default ReservationsManagement

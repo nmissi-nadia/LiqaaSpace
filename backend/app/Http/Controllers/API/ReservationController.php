@@ -41,11 +41,11 @@ class ReservationController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"salle_id","user_id","date_debut","date_fin","statut"},
+     *             required={"salle_id","user_id","heure_debut","heure_fin","statut"},
      *             @OA\Property(property="salle_id", type="integer", example=1),
      *             @OA\Property(property="user_id", type="integer", example=1),
-     *             @OA\Property(property="date_debut", type="string", format="date-time", example="2025-05-22 10:00:00"),
-     *             @OA\Property(property="date_fin", type="string", format="date-time", example="2025-05-22 12:00:00"),
+     *             @OA\Property(property="heure_debut", type="string", format="date-time", example="2025-05-22 10:00:00"),
+     *             @OA\Property(property="heure_fin", type="string", format="date-time", example="2025-05-22 12:00:00"),
      *             @OA\Property(property="statut", type="string", enum={"confirmé","annulé"}, example="confirmé")
      *         )
      *     ),
@@ -63,8 +63,9 @@ class ReservationController extends Controller
     {
         $request->validate([
             'salle_id' => 'required|exists:salles,id',
-            'date_debut' => 'required|date',
-            'date_fin' => 'required|date',
+            'heure_debut' => 'required|date',
+            'heure_fin' => 'required|date',
+            'motif' => 'required|string',
             'statut' => 'required|string|in:confirmé,annulé',
         ]);
         $request->merge(['collaborateur_id' => auth()->user()->id]);
@@ -123,11 +124,11 @@ class ReservationController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"salle_id","user_id","date_debut","date_fin","statut"},
+     *             required={"salle_id","user_id","heure_debut","heure_fin","statut"},
      *             @OA\Property(property="salle_id", type="integer", example=1),
      *             @OA\Property(property="user_id", type="integer", example=1),
-     *             @OA\Property(property="date_debut", type="string", format="date-time", example="2025-05-22 10:00:00"),
-     *             @OA\Property(property="date_fin", type="string", format="date-time", example="2025-05-22 12:00:00"),
+     *             @OA\Property(property="heure_debut", type="string", format="date-time", example="2025-05-22 10:00:00"),
+     *             @OA\Property(property="heure_fin", type="string", format="date-time", example="2025-05-22 12:00:00"),
      *             @OA\Property(property="statut", type="string", enum={"confirmé","annulé"}, example="confirmé")
      *         )
      *     ),
@@ -149,11 +150,12 @@ class ReservationController extends Controller
     {
         $request->validate([
             'salle_id' => 'required|exists:salles,id',
-            'user_id' => 'required|exists:users,id',
-            'date_debut' => 'required|date',
-            'date_fin' => 'required|date',
+            'heure_debut' => 'required|date',
+            'heure_fin' => 'required|date',
+            'motif' => 'required|string',
             'statut' => 'required|string|in:confirmé,annulé',
         ]);
+        $request->merge(['collaborateur_id' => auth()->user()->id]);
         $reservation = Reservation::findOrFail($id);
         $reservation->update($request->all());
         return response()->json([
@@ -231,9 +233,10 @@ class ReservationController extends Controller
         ]);
     }
     // reservation par utilisateur
-    public function getReservationsByUser(string $id)
+    public function getReservationsByUser()
     {
-        $reservations = Reservation::where('collaborateur_id', $id)->get();
+        $id = auth()->user()->id;
+        $reservations = Reservation::where('collaborateur_id', $id)->with('salle', 'collaborateur')->get();
         return response()->json([
             'status' => 'success',
             'data' => $reservations
@@ -255,7 +258,7 @@ class ReservationController extends Controller
         $reservations = Reservation::with('salle', 'collaborateur')
             ->where('statut', 'accepté')
             ->where('date', '>=', now())
-            ->orderBy('date', 'heure_debut')
+            ->orderBy('heure_debut')
             ->take(4)
             ->get();
 

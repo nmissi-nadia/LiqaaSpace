@@ -522,8 +522,8 @@
                                 "required": [
                                     "salle_id",
                                     "user_id",
-                                    "date_debut",
-                                    "date_fin",
+                                    "heure_debut",
+                                    "heure_fin",
                                     "statut"
                                 ],
                                 "properties": {
@@ -535,12 +535,12 @@
                                         "type": "integer",
                                         "example": 1
                                     },
-                                    "date_debut": {
+                                    "heure_debut": {
                                         "type": "string",
                                         "format": "date-time",
                                         "example": "2025-05-22 10:00:00"
                                     },
-                                    "date_fin": {
+                                    "heure_fin": {
                                         "type": "string",
                                         "format": "date-time",
                                         "example": "2025-05-22 12:00:00"
@@ -621,8 +621,8 @@
                                 "required": [
                                     "salle_id",
                                     "user_id",
-                                    "date_debut",
-                                    "date_fin",
+                                    "heure_debut",
+                                    "heure_fin",
                                     "statut"
                                 ],
                                 "properties": {
@@ -634,12 +634,12 @@
                                         "type": "integer",
                                         "example": 1
                                     },
-                                    "date_debut": {
+                                    "heure_debut": {
                                         "type": "string",
                                         "format": "date-time",
                                         "example": "2025-05-22 10:00:00"
                                     },
-                                    "date_fin": {
+                                    "heure_fin": {
                                         "type": "string",
                                         "format": "date-time",
                                         "example": "2025-05-22 12:00:00"

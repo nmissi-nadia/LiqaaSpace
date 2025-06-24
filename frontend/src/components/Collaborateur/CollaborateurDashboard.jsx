@@ -1,474 +1,601 @@
-import React, { useState, useEffect  } from 'react';
-import { 
-  Container, 
-  Typography, 
-  Grid, 
-  Card, 
-  CardContent, 
-  Button,
-  Box,
-  Avatar,
-  LinearProgress,
-  Divider,
-  Chip,
-  CircularProgress,
-  Alert
-} from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
+import { Card, Row, Col, Typography, Button, Space, Avatar, Progress, Tag, Divider, Empty, Spin, Alert } from "antd"
 import {
-  EventAvailable as EventAvailableIcon,
-  EventNote as EventNoteIcon,
-  MeetingRoom as MeetingRoomIcon,
-  People as PeopleIcon,
-  AccessTime as AccessTimeIcon,
-  CheckCircle as CheckCircleIcon,
-  Warning as WarningIcon,
-  CalendarToday as CalendarTodayIcon
-} from '@mui/icons-material';
-import { styled } from '@mui/material/styles';
-import { toast } from 'react-toastify';
-import api from '../../services/api';
-import { useAuth } from '../../contexts/AuthContext';
+  CalendarOutlined,
+  HomeOutlined,
+  TeamOutlined,
+  ClockCircleOutlined,
+  PlusOutlined,
+  EyeOutlined,
+  CheckCircleOutlined,
+  ExclamationCircleOutlined,
+  CloseCircleOutlined,
+  UserOutlined,
+  RightOutlined,
+} from "@ant-design/icons"
+import { format, parseISO } from "date-fns"
+import { fr } from "date-fns/locale"
+import axios from "axios"
 
-
-const StatCard = styled(Card)(({ theme }) => ({
-  height: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-  transition: 'transform 0.3s ease-in-out',
-  '&:hover': {
-    transform: 'translateY(-5px)',
-    boxShadow: theme.shadows[8]
-  }
-}));
-
-const StyledChip = styled(Chip)(({ theme }) => ({
-  marginRight: theme.spacing(1),
-  marginBottom: theme.spacing(1)
-}));
+const { Title, Text } = Typography
 
 const CollaborateurDashboard = () => {
-  const navigate = useNavigate();
-  const { user } = useAuth();
+  const navigate = useNavigate()
   const [stats, setStats] = useState({
-    reunionsAVenir: 0,
-    reservationsEffectuees: 0,
-    membresEquipe: 0,
-    disponibilite: 0,
-    totalSalles: 0,
-    sallesDisponibles: 0
-  });
-  const [chargement, setChargement] = useState(true);
-  const [erreur, setErreur] = useState(null);
-  const [reunionsAVenir, setReunionsAVenir] = useState([]);
-  const [sallesDisponibles, setSallesDisponibles] = useState([]);
-  // récupérer l'id de l'utilisateur connecté
-  const id = user ? user.id : null;
-  // récupérer le token
-  const token = localStorage.getItem('token');
+    totalReservations: 0,
+    totalSallesoccupe: 0,
+    totalCollaborateurs: 0,
+    totalsalledispo: 0,
+  })
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [reunionsAVenir, setReunionsAVenir] = useState([])
+  const [sallesDisponibles, setSallesDisponibles] = useState([])
+  const [user, setUser] = useState(null)
 
-  // Récupération des données depuis l'API
   useEffect(() => {
-    const recupererDonnees = async () => {
+    const fetchData = async () => {
       try {
-        setChargement(true);
-        const token = localStorage.getItem('token');
-        
-        // Configuration des headers avec le token
+        setLoading(true)
+        const token = localStorage.getItem("access_token")
+        const userData = JSON.parse(localStorage.getItem("user") || "{}")
+        setUser(userData)
+
         const headers = {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        };
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        }
 
         // Récupération des statistiques
-        const statsResponse = await api.get('/api/stats/collaborateur', { headers });
-        console.log('Stats:', statsResponse.data);
+        const statsResponse = await axios.get("http://localhost:8000/api/stats/collaborateur", { headers })
 
         // Récupération des réunions à venir
-        const reunionsResponse = await api.get(`/api/reservations/avenir/${id}`, { headers });
-        console.log('Réunions:', reunionsResponse.data);
+        const reunionsResponse = await axios.get(`http://localhost:8000/api/reservations/avenir/${userData.id}`, {
+          headers,
+        })
 
         // Récupération des salles disponibles
-        const sallesResponse = await api.get('/api/salles/disponibles', { headers });
-        console.log('Salles:', sallesResponse.data);
-
-        // Mise à jour des états
+        const sallesResponse = await axios.get("http://localhost:8000/api/salles/disponibles", { headers })
+        console.log(statsResponse.data)
         setStats({
           ...statsResponse.data,
-          disponibilite: calculerTauxDisponibilite(statsResponse.data)
-        });
-        setReunionsAVenir(reunionsResponse.data);
-        setSallesDisponibles(sallesResponse.data);
-
+        })
+        setReunionsAVenir(reunionsResponse.data)
+        setSallesDisponibles(sallesResponse.data)
       } catch (err) {
-        console.error('Erreur lors de la récupération des données:', err);
-        setErreur('Impossible de charger les données. Veuillez réessayer plus tard.');
-        toast.error('Erreur lors du chargement des données');
+        console.error("Erreur lors de la récupération des données:", err)
+        setError("Impossible de charger les données. Veuillez réessayer plus tard.")
       } finally {
-        setChargement(false);
+        setLoading(false)
       }
-    };
-
-    if (user) {
-      recupererDonnees();
     }
-  }, [user]);
 
-  const calculerTauxDisponibilite = (donnees) => {
-    const totalSalles = donnees.sallesDisponibles + donnees.sallesOccupees;
-    return totalSalles > 0 
-      ? Math.round((donnees.sallesDisponibles / totalSalles) * 100) 
-      : 0;
-  };
+    fetchData()
+  }, [])
 
-  const formaterDate = (chaineDate) => {
-    const options = { 
-      weekday: 'long', 
-      day: 'numeric', 
-      month: 'long', 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    };
-    return new Date(chaineDate).toLocaleDateString('fr-FR', options);
-  };
-
-  const obtenirIconeStatut = (statut) => {
-    switch(statut) {
-      case 'accepté':
-        return <CheckCircleIcon color="success" fontSize="small" />;
-      case 'en attente':
-        return <AccessTimeIcon color="warning" fontSize="small" />;
-      default:
-        return <WarningIcon color="error" fontSize="small" />;
-    }
-  };
-
-  if (chargement) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
-        <CircularProgress />
-      </Box>
-    );
+  const calculateAvailabilityRate = (data) => {
+    const totalSalles = data.totalsalledispo + data.totalSallesoccupe
+    return totalSalles > 0 ? Math.round((data.totalsalledispo / totalSalles) * 100) : 0
   }
 
-  if (erreur) {
+  const formatDate = (dateString) => {
+    try {
+      return format(parseISO(dateString), "EEEE d MMMM à HH:mm", { locale: fr })
+    } catch (error) {
+      return dateString
+    }
+  }
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case "accepté":
+        return <CheckCircleOutlined style={{ color: "#10b981" }} />
+      case "en attente":
+        return <ExclamationCircleOutlined style={{ color: "#f59e0b" }} />
+      default:
+        return <CloseCircleOutlined style={{ color: "#ef4444" }} />
+    }
+  }
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "accepté":
+        return "green"
+      case "en attente":
+        return "orange"
+      default:
+        return "red"
+    }
+  }
+
+  if (loading) {
     return (
-      <Box textAlign="center" py={4}>
-        <WarningIcon color="error" sx={{ fontSize: 48, mb: 2 }} />
-        <Typography variant="h6" color="error" gutterBottom>
-          Erreur de chargement
-        </Typography>
-        <Typography color="textSecondary" paragraph>
-          {erreur}
-        </Typography>
-        <Button 
-          variant="contained" 
-          color="primary"
-          onClick={() => window.location.reload()}
-        >
-          Réessayer
-        </Button>
-      </Box>
-    );
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "60vh",
+          flexDirection: "column",
+        }}
+      >
+        <Spin size="large" />
+        <Text style={{ marginTop: "16px", color: "#666" }}>Chargement de votre espace...</Text>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div style={{ padding: "24px" }}>
+        <Alert
+          message="Erreur de chargement"
+          description={error}
+          type="error"
+          showIcon
+          action={
+            <Button size="small" onClick={() => window.location.reload()}>
+              Réessayer
+            </Button>
+          }
+        />
+      </div>
+    )
   }
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
-        <Typography variant="h4" component="h1" fontWeight="bold" color="primary">
-          Mon Espace Personnel
-        </Typography>
-        <Button 
-          variant="contained" 
-          color="primary" 
-          startIcon={<EventAvailableIcon />}
-          onClick={() => navigate('/collaborateur/mesreservations')}
-        >
-          Nouvelle réservation
-        </Button>
-      </Box>
-      
+    <div
+      style={{
+        padding: "24px",
+        background: "linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)",
+        minHeight: "100vh",
+      }}
+    >
+      {/* En-tête de bienvenue */}
+      <div
+        style={{
+          background: "rgba(255, 255, 255, 0.95)",
+          borderRadius: "16px",
+          padding: "24px",
+          marginBottom: "24px",
+          boxShadow: "0 8px 32px rgba(16, 185, 129, 0.1)",
+          backdropFilter: "blur(10px)",
+        }}
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            <Avatar size={64} className="bg-emerald-500">
+              <UserOutlined style={{ fontSize: "28px" }} />
+            </Avatar>
+            <div>
+              <Title
+                level={2}
+                style={{
+                  margin: 0,
+                  background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  fontSize: "28px",
+                  fontWeight: "bold",
+                }}
+              >
+                Bonjour {user?.name || "Collaborateur"} !
+              </Title>
+              <Text type="secondary" style={{ fontSize: "16px" }}>
+                Bienvenue dans votre espace personnel
+              </Text>
+            </div>
+          </div>
+
+          <Button
+            type="primary"
+            size="large"
+            icon={<PlusOutlined />}
+            onClick={() => navigate("/collaborateur/mesreservations")}
+            style={{
+              borderRadius: "12px",
+              background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+              border: "none",
+              height: "48px",
+              paddingLeft: "24px",
+              paddingRight: "24px",
+            }}
+          >
+            Nouvelle réservation
+          </Button>
+        </div>
+      </div>
+
       {/* Cartes de statistiques */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard>
-            <CardContent>
-              <Box display="flex" alignItems="center" mb={2}>
-                <Avatar sx={{ bgcolor: 'primary.light', mr: 2 }}>
-                  <EventNoteIcon />
-                </Avatar>
-                <Typography variant="h6" color="textSecondary">Mes Réservations</Typography>
-              </Box>
-              <Typography variant="h4" component="div" gutterBottom>
-                {stats.reservationsEffectuees}
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                {stats.reservationsEffectuees === 1 ? 'Réservation effectuée' : 'Réservations effectuées'}
-              </Typography>
-            </CardContent>
-          </StatCard>
-        </Grid>
-        
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard>
-            <CardContent>
-              <Box display="flex" alignItems="center" mb={2}>
-                <Avatar sx={{ bgcolor: 'success.light', mr: 2 }}>
-                  <PeopleIcon />
-                </Avatar>
-                <Typography variant="h6" color="textSecondary">Équipe</Typography>
-              </Box>
-              <Typography variant="h4" component="div" gutterBottom>
-                {stats.membresEquipe}
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                {stats.membresEquipe === 1 ? 'Membre dans votre équipe' : 'Membres dans votre équipe'}
-              </Typography>
-            </CardContent>
-          </StatCard>
-        </Grid>
-        
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard>
-            <CardContent>
-              <Box display="flex" alignItems="center" mb={2}>
-                <Avatar sx={{ bgcolor: 'warning.light', mr: 2 }}>
-                  <MeetingRoomIcon />
-                </Avatar>
-                <Typography variant="h6" color="textSecondary">Disponibilité</Typography>
-              </Box>
-              <Box display="flex" alignItems="center" mb={1}>
-                <Typography variant="h4" component="div" sx={{ mr: 1 }}>
-                  {stats.disponibilite}%
-                </Typography>
-              </Box>
-              <Box sx={{ width: '100%', mr: 1 }}>
-                <LinearProgress 
-                  variant="determinate" 
-                  value={stats.disponibilite} 
-                  color={stats.disponibilite > 50 ? 'success' : 'warning'}
-                  sx={{ height: 8, borderRadius: 5 }}
-                />
-              </Box>
-              <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
-                {stats.sallesDisponibles} {stats.sallesDisponibles === 1 ? 'salle disponible' : 'salles disponibles'}
-              </Typography>
-            </CardContent>
-          </StatCard>
-        </Grid>
-        
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard>
-            <CardContent>
-              <Box display="flex" alignItems="center" mb={2}>
-                <Avatar sx={{ bgcolor: 'info.light', mr: 2 }}>
-                  <CalendarTodayIcon />
-                </Avatar>
-                <Typography variant="h6" color="textSecondary">Salles</Typography>
-              </Box>
-              <Typography variant="h4" component="div" gutterBottom>
-                {stats.totalSalles}
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                {stats.totalSalles === 1 ? 'Salle au total' : 'Salles au total'}
-              </Typography>
-            </CardContent>
-          </StatCard>
-        </Grid>
-      </Grid>
-      
-      <Grid container spacing={3}>
-        {/* Prochaines réunions */}
-        <Grid item xs={12} md={8}>
-          <Card>
-            <CardContent>
-              <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-                <Typography variant="h6" component="h2">
-                  Mes prochaines réunions
-                </Typography>
-                <Button 
-                  color="primary" 
-                  size="small"
-                  onClick={() => navigate('/collaborateur/mesreservations')}
-                  endIcon={<EventNoteIcon />}
-                >
-                  Voir tout
-                </Button>
-              </Box>
-              
-              {reunionsAVenir.length > 0 ? (
-                <Box>
-                  {reunionsAVenir.map((reunion) => (
-                    <Box key={reunion.id}>
-                      <Box 
-                        display="flex" 
-                        justifyContent="space-between" 
-                        alignItems="center" 
-                        p={2}
-                        sx={{ 
-                          '&:hover': { 
-                            bgcolor: 'action.hover',
-                            borderRadius: 1,
-                            cursor: 'pointer' 
-                          } 
-                        }}
-                        onClick={() => navigate(`/collaborateur/reunion/${reunion.id}`)}
-                      >
-                        <Box>
-                          <Box display="flex" alignItems="center" mb={0.5}>
-                            {obtenirIconeStatut(reunion.statut)}
-                            <Typography variant="subtitle1" sx={{ ml: 1, fontWeight: 'medium' }}>
-                              {reunion.titre}
-                            </Typography>
-                          </Box>
-                          <Box display="flex" flexWrap="wrap" alignItems="center">
-                            <StyledChip 
-                              icon={<MeetingRoomIcon fontSize="small" />} 
-                              label={reunion.salle.nom} 
-                              size="small" 
-                              variant="outlined"
-                            />
-                            <Typography variant="body2" color="textSecondary">
-                              {formaterDate(reunion.date_debut)}
-                            </Typography>
-                          </Box>
-                        </Box>
-                        <Button 
-                          variant="outlined" 
-                          size="small"
-                          color="primary"
-                        >
-                          Détails
-                        </Button>
-                      </Box>
-                      <Divider sx={{ my: 1 }} />
-                    </Box>
-                  ))}
-                </Box>
-              ) : (
-                <Box textAlign="center" py={4}>
-                  <EventNoteIcon color="disabled" sx={{ fontSize: 48, mb: 2 }} />
-                  <Typography variant="body1" color="textSecondary">
-                    Aucune réunion à venir
-                  </Typography>
-                  <Button 
-                    variant="text" 
-                    color="primary"
-                    onClick={() => navigate('/collaborateur/mesreservations')}
-                    sx={{ mt: 2 }}
-                  >
-                    Réserver une salle
-                  </Button>
-                </Box>
-              )}
-            </CardContent>
+      <Row gutter={[24, 24]} style={{ marginBottom: "24px" }}>
+        <Col xs={24} sm={12} lg={6}>
+          <Card
+            style={{
+              borderRadius: "16px",
+              background: "rgba(255, 255, 255, 0.95)",
+              backdropFilter: "blur(10px)",
+              boxShadow: "0 8px 32px rgba(16, 185, 129, 0.1)",
+              border: "1px solid rgba(16, 185, 129, 0.1)",
+              transition: "all 0.3s ease",
+            }}
+            className="hover:shadow-xl hover:-translate-y-1"
+          >
+            <div style={{ display: "flex", alignItems: "center", marginBottom: "16px" }}>
+              <div
+                style={{
+                  width: "48px",
+                  height: "48px",
+                  borderRadius: "12px",
+                  background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginRight: "12px",
+                }}
+              >
+                <CalendarOutlined style={{ color: "white", fontSize: "20px" }} />
+              </div>
+              <Text type="secondary">Mes Réservations</Text>
+            </div>
+            <Title level={2} style={{ margin: "0 0 8px 0", color: "#1f2937" }}>
+              {stats.totalReservations}
+            </Title>
+            <Text type="secondary">
+              {stats.totalReservations === 1 ? "Réservation effectuée" : "Réservations effectuées"}
+            </Text>
           </Card>
-        </Grid>
-        
-        {/* Salles disponibles */}
-        <Grid item xs={12} md={4}>
-          <Card>
-            <CardContent>
-              <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-                <Typography variant="h6" component="h2">
-                  Salles disponibles
-                </Typography>
-                <Button 
-                  color="primary" 
-                  size="small"
-                  onClick={() => navigate('/collaborateur/sallesdisponibles')}
-                  endIcon={<MeetingRoomIcon />}
+        </Col>
+
+        <Col xs={24} sm={12} lg={6}>
+          <Card
+            style={{
+              borderRadius: "16px",
+              background: "rgba(255, 255, 255, 0.95)",
+              backdropFilter: "blur(10px)",
+              boxShadow: "0 8px 32px rgba(16, 185, 129, 0.1)",
+              border: "1px solid rgba(16, 185, 129, 0.1)",
+              transition: "all 0.3s ease",
+            }}
+            className="hover:shadow-xl hover:-translate-y-1"
+          >
+            <div style={{ display: "flex", alignItems: "center", marginBottom: "16px" }}>
+              <div
+                style={{
+                  width: "48px",
+                  height: "48px",
+                  borderRadius: "12px",
+                  background: "linear-gradient(135deg, #059669 0%, #047857 100%)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginRight: "12px",
+                }}
+              >
+                <TeamOutlined style={{ color: "white", fontSize: "20px" }} />
+              </div>
+              <Text type="secondary">Équipe</Text>
+            </div>
+            <Title level={2} style={{ margin: "0 0 8px 0", color: "#1f2937" }}>
+              {stats.totalCollaborateurs}
+            </Title>
+            <Text type="secondary">
+              {stats.totalCollaborateurs === 1 ? "Collaborateur dans l'équipe" : "Collaborateurs dans l'équipe"}
+            </Text>
+          </Card>
+        </Col>
+
+        <Col xs={24} sm={12} lg={6}>
+          <Card
+            style={{
+              borderRadius: "16px",
+              background: "rgba(255, 255, 255, 0.95)",
+              backdropFilter: "blur(10px)",
+              boxShadow: "0 8px 32px rgba(16, 185, 129, 0.1)",
+              border: "1px solid rgba(16, 185, 129, 0.1)",
+              transition: "all 0.3s ease",
+            }}
+            className="hover:shadow-xl hover:-translate-y-1"
+          >
+            <div style={{ display: "flex", alignItems: "center", marginBottom: "16px" }}>
+              <div
+                style={{
+                  width: "48px",
+                  height: "48px",
+                  borderRadius: "12px",
+                  background: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginRight: "12px",
+                }}
+              >
+                <HomeOutlined style={{ color: "white", fontSize: "20px" }} />
+              </div>
+              <Text type="secondary">Disponibilité</Text>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", marginBottom: "12px" }}>
+              <Title level={2} style={{ margin: "0 8px 0 0", color: "#1f2937" }}>
+                {calculateAvailabilityRate(stats)}%
+              </Title>
+            </div>
+            <Progress
+              percent={calculateAvailabilityRate(stats)}
+              strokeColor={{
+                "0%": "#10b981",
+                "100%": "#059669",
+              }}
+              trailColor="#f3f4f6"
+              strokeWidth={8}
+              showInfo={false}
+              style={{ marginBottom: "8px" }}
+            />
+            <Text type="secondary">
+              {stats.totalsalledispo} {stats.totalsalledispo === 1 ? "salle disponible" : "salles disponibles"}
+            </Text>
+          </Card>
+        </Col>
+
+        <Col xs={24} sm={12} lg={6}>
+          <Card
+            style={{
+              borderRadius: "16px",
+              background: "rgba(255, 255, 255, 0.95)",
+              backdropFilter: "blur(10px)",
+              boxShadow: "0 8px 32px rgba(16, 185, 129, 0.1)",
+              border: "1px solid rgba(16, 185, 129, 0.1)",
+              transition: "all 0.3s ease",
+            }}
+            className="hover:shadow-xl hover:-translate-y-1"
+          >
+            <div style={{ display: "flex", alignItems: "center", marginBottom: "16px" }}>
+              <div
+                style={{
+                  width: "48px",
+                  height: "48px",
+                  borderRadius: "12px",
+                  background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginRight: "12px",
+                }}
+              >
+                <HomeOutlined style={{ color: "white", fontSize: "20px" }} />
+              </div>
+              <Text type="secondary">Salles</Text>
+            </div>
+            <Title level={2} style={{ margin: "0 0 8px 0", color: "#1f2937" }}>
+              {stats.totalsalledispo + stats.totalSallesoccupe}
+            </Title>
+            <Text type="secondary">
+              {stats.totalsalledispo + stats.totalSallesoccupe === 1 ? "Salle au total" : "Salles au total"}
+            </Text>
+          </Card>
+        </Col>
+      </Row>
+
+      <Row gutter={[24, 24]}>
+        {/* Prochaines réunions */}
+        <Col xs={24} lg={16}>
+          <Card
+            title={
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <CalendarOutlined style={{ color: "#10b981" }} />
+                  <span>Mes prochaines réunions</span>
+                </div>
+                <Button
+                  type="text"
+                  onClick={() => navigate("/collaborateur/mesreservations")}
+                  style={{ color: "#10b981" }}
+                  icon={<RightOutlined />}
                 >
                   Voir tout
                 </Button>
-              </Box>
-              
-              {sallesDisponibles.length > 0 ? (
-                <Box>
-                  {sallesDisponibles.map((salle) => (
-                    <Box 
-                      key={salle.id} 
-                      display="flex" 
-                      justifyContent="space-between" 
-                      alignItems="center"
-                      p={2}
-                      mb={1}
-                      sx={{ 
-                        bgcolor: salle.disponible ? 'success.lighter' : 'grey.100',
-                        borderRadius: 1,
-                        borderLeft: `4px solid ${salle.disponible ? 'success.main' : 'grey.500'}`
+              </div>
+            }
+            style={{
+              borderRadius: "16px",
+              background: "rgba(255, 255, 255, 0.95)",
+              backdropFilter: "blur(10px)",
+              boxShadow: "0 8px 32px rgba(16, 185, 129, 0.1)",
+            }}
+          >
+            {reunionsAVenir.length > 0 ? (
+              <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+                {reunionsAVenir.map((reunion, index) => (
+                  <div key={reunion.id}>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        padding: "16px",
+                        borderRadius: "12px",
+                        background: "rgba(16, 185, 129, 0.05)",
+                        border: "1px solid rgba(16, 185, 129, 0.1)",
+                        cursor: "pointer",
+                        transition: "all 0.2s ease",
+                      }}
+                      className="hover:bg-emerald-50"
+                      onClick={() => navigate(`/collaborateur/reunion/${reunion.id}`)}
+                    >
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: "flex", alignItems: "center", marginBottom: "8px" }}>
+                          {getStatusIcon(reunion.status)}
+                          <Text strong style={{ marginLeft: "8px", fontSize: "16px" }}>
+                            {reunion.titre || reunion.motif}
+                          </Text>
+                        </div>
+                        <Space wrap>
+                          <Tag icon={<HomeOutlined />} color="green">
+                            {reunion.salle?.nom}
+                          </Tag>
+                          <Text type="secondary">{formatDate(reunion.heure_debut || reunion.date)}</Text>
+                        </Space>
+                      </div>
+                      <Button type="primary" ghost style={{ borderColor: "#10b981", color: "#10b981" }}>
+                        Détails
+                      </Button>
+                    </div>
+                    {index < reunionsAVenir.length - 1 && <Divider style={{ margin: "8px 0" }} />}
+                  </div>
+                ))}
+              </Space>
+            ) : (
+              <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                description={
+                  <div>
+                    <Text type="secondary">Aucune réunion à venir</Text>
+                    <br />
+                    <Button
+                      type="primary"
+                      onClick={() => navigate("/collaborateur/mesreservations")}
+                      style={{
+                        marginTop: "16px",
+                        background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                        border: "none",
                       }}
                     >
-                      <Box>
-                        <Typography variant="subtitle1" fontWeight="medium">
-                          {salle.nom}
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary">
-                          Capacité: {salle.capacite} personnes
-                        </Typography>
-                      </Box>
-                      <Chip 
-                        label={salle.disponible ? 'Disponible' : 'Occupée'} 
-                        color={salle.disponible ? 'success' : 'default'}
-                        size="small"
-                        variant={salle.disponible ? 'filled' : 'outlined'}
-                      />
-                    </Box>
-                  ))}
-                </Box>
-              ) : (
-                <Box textAlign="center" py={4}>
-                  <MeetingRoomIcon color="disabled" sx={{ fontSize: 48, mb: 2 }} />
-                  <Typography variant="body1" color="textSecondary">
-                    Aucune salle disponible pour le moment
-                  </Typography>
-                </Box>
-              )}
-            </CardContent>
+                      Réserver une salle
+                    </Button>
+                  </div>
+                }
+              />
+            )}
           </Card>
-          
-          {/* Actions rapides */}
-          <Card sx={{ mt: 3 }}>
-            <CardContent>
-              <Typography variant="h6" component="h2" gutterBottom>
-                Actions rapides
-              </Typography>
-              <Box display="flex" flexDirection="column" gap={2}>
-                <Button 
-                  variant="contained" 
-                  color="primary" 
-                  fullWidth
-                  startIcon={<EventAvailableIcon />}
-                  onClick={() => navigate('/collaborateur/mesreservations')}
+        </Col>
+
+        {/* Salles disponibles et actions rapides */}
+        <Col xs={24} lg={8}>
+          <Space direction="vertical" size="large" style={{ width: "100%" }}>
+            {/* Salles disponibles */}
+            <Card
+              title={
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <HomeOutlined style={{ color: "#10b981" }} />
+                    <span>Salles disponibles</span>
+                  </div>
+                  <Button
+                    type="text"
+                    onClick={() => navigate("/collaborateur/sallesdisponibles")}
+                    style={{ color: "#10b981" }}
+                    icon={<RightOutlined />}
+                  >
+                    Voir tout
+                  </Button>
+                </div>
+              }
+              style={{
+                borderRadius: "16px",
+                background: "rgba(255, 255, 255, 0.95)",
+                backdropFilter: "blur(10px)",
+                boxShadow: "0 8px 32px rgba(16, 185, 129, 0.1)",
+              }}
+            >
+              {sallesDisponibles.length > 0 ? (
+                <Space direction="vertical" size="small" style={{ width: "100%" }}>
+                  {sallesDisponibles.slice(0, 4).map((salle) => (
+                    <div
+                      key={salle.id}
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        padding: "12px",
+                        borderRadius: "8px",
+                        background: salle.disponible ? "rgba(16, 185, 129, 0.05)" : "rgba(156, 163, 175, 0.05)",
+                        borderLeft: `4px solid ${salle.disponible ? "#10b981" : "#9ca3af"}`,
+                      }}
+                    >
+                      <div>
+                        <Text strong>{salle.nom}</Text>
+                        <br />
+                        <Text type="secondary" style={{ fontSize: "12px" }}>
+                          Capacité: {salle.capacite} personnes
+                        </Text>
+                      </div>
+                      <Tag color={salle.disponible ? "green" : "default"}>
+                        {salle.disponible ? "Disponible" : "Occupée"}
+                      </Tag>
+                    </div>
+                  ))}
+                </Space>
+              ) : (
+                <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Aucune salle disponible pour le moment" />
+              )}
+            </Card>
+
+            {/* Actions rapides */}
+            <Card
+              title={
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <ClockCircleOutlined style={{ color: "#10b981" }} />
+                  <span>Actions rapides</span>
+                </div>
+              }
+              style={{
+                borderRadius: "16px",
+                background: "rgba(255, 255, 255, 0.95)",
+                backdropFilter: "blur(10px)",
+                boxShadow: "0 8px 32px rgba(16, 185, 129, 0.1)",
+              }}
+            >
+              <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+                <Button
+                  type="primary"
+                  size="large"
+                  block
+                  icon={<PlusOutlined />}
+                  onClick={() => navigate("/collaborateur/mesreservations")}
+                  style={{
+                    borderRadius: "8px",
+                    background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                    border: "none",
+                    height: "48px",
+                  }}
                 >
                   Nouvelle réservation
                 </Button>
-                <Button 
-                  variant="outlined" 
-                  color="primary" 
-                  fullWidth
-                  startIcon={<EventNoteIcon />}
-                  onClick={() => navigate('/collaborateur/mesreservations')}
+                <Button
+                  size="large"
+                  block
+                  icon={<EyeOutlined />}
+                  onClick={() => navigate("/collaborateur/mesreservations")}
+                  style={{
+                    borderRadius: "8px",
+                    borderColor: "#10b981",
+                    color: "#10b981",
+                    height: "48px",
+                  }}
                 >
                   Voir mes réservations
                 </Button>
-                <Button 
-                  variant="outlined" 
-                  color="secondary" 
-                  fullWidth
-                  startIcon={<MeetingRoomIcon />}
-                  onClick={() => navigate('/collaborateur/sallesdisponibles')}
+                <Button
+                  size="large"
+                  block
+                  icon={<HomeOutlined />}
+                  onClick={() => navigate("/collaborateur/sallesdisponibles")}
+                  style={{
+                    borderRadius: "8px",
+                    borderColor: "#10b981",
+                    color: "#10b981",
+                    height: "48px",
+                  }}
                 >
                   Explorer les salles
                 </Button>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-    </Container>
-  );
-};
+              </Space>
+            </Card>
+          </Space>
+        </Col>
+      </Row>
+    </div>
+  )
+}
 
-export default CollaborateurDashboard;
+export default CollaborateurDashboard

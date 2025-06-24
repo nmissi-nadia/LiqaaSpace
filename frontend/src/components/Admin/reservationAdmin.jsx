@@ -154,7 +154,7 @@ const ReservationAdmin = () => {
   const fetchReservations = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('access_token');
       const response = await api.get('/api/reservations', {
         headers: {
           'Content-Type': 'application/json',
@@ -178,7 +178,7 @@ const ReservationAdmin = () => {
 
   const handleDelete = async (id) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('access_token');
       await api.delete(`/api/reservations/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -193,12 +193,12 @@ const ReservationAdmin = () => {
   // Pour changer le statut, il faut envoyer tous les champs requis
   const handleStatusChange = async (record, newStatus) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('access_token');
       await api.put(`/api/reservations/${record.id}`, {
         salle_id: record.salle?.id,
         collaborateur_id: record.collaborateur?.id,
-        date_debut: record.date_debut,
-        date_fin: record.date_fin,
+        heure_debut: record.heure_debut,
+        heure_fin: record.heure_fin,
         statut: newStatus
       }, {
         headers: { Authorization: `Bearer ${token}` }
@@ -226,7 +226,7 @@ const ReservationAdmin = () => {
     if (filters.dateRange && filters.dateRange.length === 2) {
       const start = filters.dateRange[0].startOf('day');
       const end = filters.dateRange[1].endOf('day');
-      ok = ok && moment(res.date_debut).isBetween(start, end, null, '[]');
+      ok = ok && moment(res.heure_debut).isBetween(start, end, null, '[]');
     }
     return ok;
   });

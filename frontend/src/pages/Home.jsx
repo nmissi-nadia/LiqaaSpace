@@ -20,6 +20,9 @@ import {
   Camera,
   Headphones
 } from 'lucide-react';
+import salle1 from '../assets/images/salle.jpg';
+import salle2 from '../assets/images/salle2.jpeg';
+import salle3 from '../assets/images/salle3.jpeg';
 
 const Home = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -27,19 +30,19 @@ const Home = () => {
 
   const heroSlides = [
     {
+      image: salle1,
       title: "Réservez vos salles en toute simplicité",
       subtitle: "Gérez efficacement vos espaces de réunion avec notre plateforme intelligente",
-      image: "bg-gradient-to-r from-green-300 via-green-400 to-green-500"
     },
     {
+      image: salle2,
       title: "Optimisez l'utilisation de vos espaces",
       subtitle: "Analysez les données d'occupation et maximisez votre retour sur investissement",
-      image: "bg-gradient-to-r from-green-400 via-green-500 to-green-600"
     },
     {
+      image: salle3,
       title: "Collaboration sans limites",
       subtitle: "Des salles équipées des dernières technologies pour vos réunions",
-      image: "bg-gradient-to-r from-green-400 via-green-500 to-green-600"
     }
   ];
 
@@ -158,10 +161,14 @@ const Home = () => {
 
       {/* Hero Section */}
       <div className="relative pt-16 overflow-hidden">
-        <div className={`absolute inset-0 ${heroSlides[currentSlide].image} opacity-90`}></div>
-        <div className="absolute inset-0 bg-black/20"></div>
-        
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+        <img
+          src={heroSlides[currentSlide].image}
+          alt="Salle de réunion"
+          className="absolute inset-0 w-full h-full object-cover opacity-90 z-0"
+          style={{ minHeight: 400, maxHeight: 700 }}
+        />
+        <div className="absolute inset-0 bg-black/20 z-10"></div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 z-20">
           <div className="text-center text-white">
             <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
               {heroSlides[currentSlide].title}

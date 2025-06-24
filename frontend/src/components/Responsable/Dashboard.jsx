@@ -83,17 +83,17 @@ const Dashboard = () => {
         const [statsRes, roomsRes, reservationsRes] = await Promise.all([
           api.get('api/stats/responsable', {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`
+              Authorization: `Bearer ${localStorage.getItem('access_token')}`
             }
           }),
           api.get('api/salles/top5', {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`
+              Authorization: `Bearer ${localStorage.getItem('access_token')}`
             }
           }),
-          api.get('api/reservations/prochaine', {
+          api.get('api/reservations/prochaines', {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`
+              Authorization: `Bearer ${localStorage.getItem('access_token')}`
             }
           })
         ]);
@@ -226,7 +226,7 @@ const Dashboard = () => {
                       secondary={
                         <>
                           <Typography component="span" variant="body2" display="block">
-                            {format(new Date(reservation.date_debut), 'PPPp', { locale: fr })}
+                            {format(new Date(reservation.heure_debut), 'PPPp', { locale: fr })}
                           </Typography>
                           <Typography component="span" variant="body2" color="textSecondary">
                             {reservation.utilisateur?.name}

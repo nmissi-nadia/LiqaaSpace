@@ -250,28 +250,9 @@ class SalleController extends Controller
     public function getdispo()
     {
         try {
-            // Log pour debug
-            \Log::info('Tentative de récupération des salles disponibles');
             
-            // Vérification de la connexion à la base de données
-            if (!\DB::connection()->getPdo()) {
-                throw new \Exception('Erreur de connexion à la base de données');
-            }
-
-            // Vérification de l'existence de la table
-            if (!\Schema::hasTable('salles')) {
-                throw new \Exception('La table salles n\'existe pas');
-            }
-
-            // Vérification de l'existence de la colonne status
-            if (!\Schema::hasColumn('salles', 'status')) {
-                throw new \Exception('La colonne status n\'existe pas dans la table salles');
-            }
-
             // Récupération des salles
             $salles = Salle::where('status', 'active')->get();
-            
-            \Log::info('Nombre de salles trouvées : ' . $salles->count());
             
             return response()->json([
                 'success' => true,
@@ -280,8 +261,6 @@ class SalleController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Erreur dans getSallesDisponibles : ' . $e->getMessage());
-            
             return response()->json([
                 'success' => false,
                 'error' => 'Erreur lors de la récupération des salles disponibles',
