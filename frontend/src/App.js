@@ -23,6 +23,7 @@ import SallesDisponibles from './components/Collaborateur/sallesdispo';
 import DetailsSalle from './components/Collaborateur/detailsSalle';
 import DetailSalle from './components/Admin/details_salles';
 import ReservationAdmin from './components/Admin/reservationAdmin';
+import DisponibiliteManagement from './components/Responsable/DisponibiliteManagement';
 const theme = createTheme({
   palette: {
     primary: {
@@ -65,6 +66,7 @@ function App() {
               <Route index element={<ResponsableDashboard />} />
               <Route path="Msalles" element={<SallesManagement />} />
               <Route path="reservations" element={<ReservationsManagement />} />
+              <Route path="disponibilite" element={<DisponibiliteManagement />} />
             </Route>
 
             {/* Protected Collaborateur Routes */}

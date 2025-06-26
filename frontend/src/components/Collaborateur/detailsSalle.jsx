@@ -153,196 +153,263 @@ const DetailsSalle = () => {
   ].filter(Boolean);
 
   return (
-    <div>
-      <div style={{ padding: '24px' }}>
-        <Button 
-          type="text" 
-          icon={<ArrowLeftOutlined />} 
-          onClick={() => navigate(-1)}
-          style={{ marginBottom: '16px' }}
-        >
-          Retour
-        </Button>
+    <>
+      <div>
+        <div style={{ padding: '24px' }}>
+          <Button 
+            type="text" 
+            icon={<ArrowLeftOutlined />} 
+            onClick={() => navigate(-1)}
+            style={{ marginBottom: '16px' }}
+          >
+            Retour
+          </Button>
 
-        <Card
-          title={
-            <Title level={2} style={{ margin: 0 }}>
-              {salle.nom}
-            </Title>
-          }
-          extra={
-            <Tag color={salle.status === 'active' ? 'success' : 'error'}>
-              {salle.status === 'active' ? 'Disponible' : 'Indisponible'}
-            </Tag>
-          }
-          style={{ borderRadius: '8px', boxShadow: '0 2px 12px rgba(0, 0, 0, 0.1)' }}
-        >
-          <Row gutter={[24, 24]}>
-            <Col xs={24} md={14}>
-              <Image
-                src={salle.image_url || 'https://via.placeholder.com/1000x500?text=Sans+image'}
-                alt={salle.nom}
-                style={{ width: '100%', borderRadius: '8px' }}
-                preview={false}
-              />
+          <Card
+            title={
+              <Title level={2} style={{ margin: 0 }}>
+                {salle.nom}
+              </Title>
+            }
+            extra={
+              <Tag color={salle.status === 'active' ? 'success' : 'error'}>
+                {salle.status === 'active' ? 'Disponible' : 'Indisponible'}
+              </Tag>
+            }
+            style={{ borderRadius: '8px', boxShadow: '0 2px 12px rgba(0, 0, 0, 0.1)' }}
+          >
+            <Row gutter={[24, 24]}>
+              <Col xs={24} md={14}>
+                <Image
+                  src={salle.image_url || 'https://via.placeholder.com/1000x500?text=Sans+image'}
+                  alt={salle.nom}
+                  style={{ width: '100%', borderRadius: '8px' }}
+                  preview={false}
+                />
+                
+                <div style={{ marginTop: '24px' }}>
+                  <Title level={4}>Description</Title>
+                  <Paragraph>{salle.description || 'Aucune description disponible.'}</Paragraph>
+                  
+                  <Title level={4} style={{ marginTop: '24px' }}>Équipements</Title>
+                  <Space size="middle" style={{ marginTop: '8px' }}>
+                    {equipmentIcons.length > 0 ? (
+                      equipmentIcons.map((item, index) => (
+                        <Tag key={index} icon={item.icon}>
+                          {item.text}
+                        </Tag>
+                      ))
+                    ) : (
+                      <Text type="secondary">Aucun équipement spécifique</Text>
+                    )}
+                  </Space>
+                </div>
+              </Col>
               
-              <div style={{ marginTop: '24px' }}>
-                <Title level={4}>Description</Title>
-                <Paragraph>{salle.description || 'Aucune description disponible.'}</Paragraph>
+              <Col xs={24} md={10}>
+                <Card 
+                  title="Détails de la salle"
+                  style={{ marginBottom: '24px' }}
+                >
+                  <Descriptions column={1}>
+                  <Descriptions.Item
+                      label={
+                      <>
+                          <EnvironmentOutlined /> Localisation
+                      </>
+                      }
+                  >
+                      {salle.localisation || 'Non spécifiée'}
+                  </Descriptions.Item>
+
+                  <Descriptions.Item
+                      label={
+                      <>
+                          <UserOutlined /> Capacité
+                      </>
+                      }
+                  >
+                      {salle.capacite} personnes
+                  </Descriptions.Item>
+
+                  <Descriptions.Item
+                      label={
+                      <>
+                          <ClockCircleOutlined /> Horaires d'ouverture
+                      </>
+                      }
+                  >
+                      {salle.horaires_ouverture || 'Non spécifiés'}
+                  </Descriptions.Item>
+                  </Descriptions>
+
+                  
+                  <Button 
+                    type="primary" 
+                    block 
+                    size="large"
+                    onClick={handleReservation}
+                    disabled={salle.status !== 'active'}
+                    style={{ marginTop: '16px' }}
+                  >
+                    Réserver cette salle
+                  </Button>
+                </Card>
                 
-                <Title level={4} style={{ marginTop: '24px' }}>Équipements</Title>
-                <Space size="middle" style={{ marginTop: '8px' }}>
-                  {equipmentIcons.length > 0 ? (
-                    equipmentIcons.map((item, index) => (
-                      <Tag key={index} icon={item.icon}>
-                        {item.text}
-                      </Tag>
-                    ))
-                  ) : (
-                    <Text type="secondary">Aucun équipement spécifique</Text>
-                  )}
-                </Space>
-              </div>
-            </Col>
-            
-            <Col xs={24} md={10}>
-              <Card 
-                title="Détails de la salle"
-                style={{ marginBottom: '24px' }}
+                <Card title="Disponibilité">
+                  <Text>Vérifiez la disponibilité pour réserver cette salle.</Text>
+                  <Button 
+                    type="default" 
+                    block 
+                    style={{ marginTop: '16px' }}
+                    onClick={() => setIsModalVisible(true)}
+                  >
+                    <CalendarOutlined /> Voir les disponibilités
+                  </Button>
+                </Card>
+              </Col>
+            </Row>
+          </Card>
+
+          {/* Modal de réservation */}
+          <Modal
+            title={`Réserver la salle ${salle.nom}`}
+            open={isModalVisible}
+            onCancel={() => {
+              setIsModalVisible(false);
+              form.resetFields();
+            }}
+            footer={null}
+            width={600}
+          >
+            <Form
+              form={form}
+              layout="vertical"
+              onFinish={handleSubmitReservation}
+            >
+              <Form.Item
+                name="date"
+                label="Date de réservation"
+                rules={[{ required: true, message: 'Veuillez sélectionner une date' }]}
               >
-                <Descriptions column={1}>
-                <Descriptions.Item
-                    label={
-                    <>
-                        <EnvironmentOutlined /> Localisation
-                    </>
-                    }
+                <DatePicker 
+                  style={{ width: '100%' }} 
+                  disabledDate={(current) => {
+                    return current && current < moment().startOf('day');
+                  }}
+                />
+              </Form.Item>
+              
+              <Form.Item
+                name="heure"
+                label="Plage horaire"
+                rules={[{ required: true, message: 'Veuillez sélectionner une plage horaire' }]}
+              >
+                <RangePicker 
+                  style={{ width: '100%' }}
+                  format="HH:mm"
+                  minuteStep={15}
+                  disabledHours={() => [0, 1, 2, 3, 4, 5, 6, 7, 20, 21, 22, 23]}
+                  hideDisabledOptions
+                />
+              </Form.Item>
+              
+              <Form.Item
+                name="motif"
+                label="Motif de la réservation"
+                rules={[{ required: true, message: 'Veuillez indiquer le motif de la réservation' }]}
+              >
+                <Input.TextArea rows={4} placeholder="Décrivez l'objet de votre réunion..." />
+              </Form.Item>
+              
+              <Form.Item style={{ textAlign: 'right' }}>
+                <Button 
+                  onClick={() => {
+                    setIsModalVisible(false);
+                    form.resetFields();
+                  }} 
+                  style={{ marginRight: '8px' }}
                 >
-                    {salle.localisation || 'Non spécifiée'}
-                </Descriptions.Item>
-
-                <Descriptions.Item
-                    label={
-                    <>
-                        <UserOutlined /> Capacité
-                    </>
-                    }
-                >
-                    {salle.capacite} personnes
-                </Descriptions.Item>
-
-                <Descriptions.Item
-                    label={
-                    <>
-                        <ClockCircleOutlined /> Horaires d'ouverture
-                    </>
-                    }
-                >
-                    {salle.horaires_ouverture || 'Non spécifiés'}
-                </Descriptions.Item>
-                </Descriptions>
-
-                
+                  Annuler
+                </Button>
                 <Button 
                   type="primary" 
-                  block 
-                  size="large"
-                  onClick={handleReservation}
-                  disabled={salle.status !== 'active'}
-                  style={{ marginTop: '16px' }}
+                  htmlType="submit"
+                  loading={reservationLoading}
                 >
-                  Réserver cette salle
+                  Confirmer la réservation
                 </Button>
-              </Card>
-              
-              <Card title="Disponibilité">
-                <Text>Vérifiez la disponibilité pour réserver cette salle.</Text>
-                <Button 
-                  type="default" 
-                  block 
-                  style={{ marginTop: '16px' }}
-                  onClick={() => setIsModalVisible(true)}
-                >
-                  <CalendarOutlined /> Voir les disponibilités
-                </Button>
-              </Card>
-            </Col>
-          </Row>
-        </Card>
-
-        {/* Modal de réservation */}
-        <Modal
-          title={`Réserver la salle ${salle.nom}`}
-          open={isModalVisible}
-          onCancel={() => {
-            setIsModalVisible(false);
-            form.resetFields();
-          }}
-          footer={null}
-          width={600}
-        >
-          <Form
-            form={form}
-            layout="vertical"
-            onFinish={handleSubmitReservation}
-          >
-            <Form.Item
-              name="date"
-              label="Date de réservation"
-              rules={[{ required: true, message: 'Veuillez sélectionner une date' }]}
-            >
-              <DatePicker 
-                style={{ width: '100%' }} 
-                disabledDate={(current) => {
-                  return current && current < moment().startOf('day');
-                }}
-              />
-            </Form.Item>
-            
-            <Form.Item
-              name="heure"
-              label="Plage horaire"
-              rules={[{ required: true, message: 'Veuillez sélectionner une plage horaire' }]}
-            >
-              <RangePicker 
-                style={{ width: '100%' }}
-                format="HH:mm"
-                minuteStep={15}
-                disabledHours={() => [0, 1, 2, 3, 4, 5, 6, 7, 20, 21, 22, 23]}
-                hideDisabledOptions
-              />
-            </Form.Item>
-            
-            <Form.Item
-              name="motif"
-              label="Motif de la réservation"
-              rules={[{ required: true, message: 'Veuillez indiquer le motif de la réservation' }]}
-            >
-              <Input.TextArea rows={4} placeholder="Décrivez l'objet de votre réunion..." />
-            </Form.Item>
-            
-            <Form.Item style={{ textAlign: 'right' }}>
-              <Button 
-                onClick={() => {
-                  setIsModalVisible(false);
-                  form.resetFields();
-                }} 
-                style={{ marginRight: '8px' }}
-              >
-                Annuler
-              </Button>
-              <Button 
-                type="primary" 
-                htmlType="submit"
-                loading={reservationLoading}
-              >
-                Confirmer la réservation
-              </Button>
-            </Form.Item>
-          </Form>
-        </Modal>
+              </Form.Item>
+            </Form>
+          </Modal>
+        </div>
+        <style jsx>{`
+          @media (max-width: 1024px) {
+            .ant-row {
+              flex-direction: column !important;
+            }
+            .ant-col {
+              width: 100% !important;
+              max-width: 100% !important;
+            }
+          }
+          @media (max-width: 768px) {
+            .ant-card {
+              margin-bottom: 16px !important;
+              min-width: 0 !important;
+              max-width: 100% !important;
+            }
+            .ant-card-body {
+              padding: 12px !important;
+            }
+            .ant-typography, .ant-typography h2, .ant-typography h3, .ant-typography h4 {
+              font-size: 16px !important;
+            }
+            .ant-table {
+              font-size: 13px !important;
+            }
+            .ant-table-thead > tr > th, .ant-table-tbody > tr > td {
+              padding: 8px 4px !important;
+            }
+            .ant-row {
+              flex-direction: column !important;
+            }
+            .ant-col {
+              width: 100% !important;
+              max-width: 100% !important;
+            }
+            .ant-btn {
+              font-size: 15px !important;
+            }
+            .ant-modal {
+              width: 98vw !important;
+              max-width: 98vw !important;
+            }
+          }
+          @media (max-width: 480px) {
+            .ant-card {
+              margin-bottom: 8px !important;
+              border-radius: 8px !important;
+            }
+            .ant-card-body {
+              padding: 8px !important;
+            }
+            .ant-typography, .ant-typography h2, .ant-typography h3, .ant-typography h4 {
+              font-size: 14px !important;
+            }
+            .ant-table {
+              font-size: 12px !important;
+            }
+            .ant-btn {
+              font-size: 14px !important;
+            }
+            .ant-modal {
+              padding: 0 !important;
+            }
+          }
+        `}</style>
       </div>
-    </div>
+    </>
   );
 };
 

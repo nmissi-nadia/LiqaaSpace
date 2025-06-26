@@ -118,7 +118,7 @@ const SallesDisponibles = () => {
           bgColor: '#f6ffed',
           borderColor: '#b7eb8f'
         };
-      case 'occupée':
+      case 'inactive':
         return {
           icon: <CloseCircleOutlined />,
           color: '#d32f2f',
@@ -216,7 +216,7 @@ const SallesDisponibles = () => {
               <Tag color="success">Disponibles</Tag>
             </Badge>
             <Badge 
-              count={salles.filter(s => s.status === 'occupée').length} 
+              count={salles.filter(s => s.status === 'inactive').length} 
               style={{ backgroundColor: '#d32f2f' }}
             >
               <Tag color="error">Occupées</Tag>
@@ -240,7 +240,7 @@ const SallesDisponibles = () => {
           const statusConfig = getStatusConfig(salle.status);
           
           return (
-            <Col xs={24} sm={12} md={8} lg={6} key={salle.id}>
+            <Col xs={24} sm={24} md={12} lg={8} xl={6} key={salle.id} style={{ minWidth: 280 }}>
               <Card
                 hoverable
                 style={{
@@ -251,7 +251,10 @@ const SallesDisponibles = () => {
                   border: `2px solid ${statusConfig.borderColor}`,
                   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
                   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  position: 'relative'
+                  position: 'relative',
+                  margin: 'auto',
+                  maxWidth: 400,
+                  width: '100%'
                 }}
                 bodyStyle={{ padding: '20px' }}
                 cover={
@@ -288,7 +291,7 @@ const SallesDisponibles = () => {
                                 .replace(/^storage\//, '')
                                 .replace(/^\//, '');
                               
-                              imagePath = `http://localhost:8000/storage/salles${image}`;
+                              imagePath = `http://localhost:8000/storage/salles/${cleanPath}`;
                             }
 
                             return (
@@ -486,6 +489,37 @@ const SallesDisponibles = () => {
           width: 8px;
           height: 8px;
           border-radius: 50%;
+        }
+        @media (max-width: 768px) {
+          .salles-disponibles {
+            padding: 8px !important;
+          }
+          .ant-card {
+            margin-bottom: 16px !important;
+            min-width: 0 !important;
+            max-width: 100% !important;
+          }
+          .ant-card-body {
+            padding: 12px !important;
+          }
+          .ant-typography, .ant-typography h2, .ant-typography h3, .ant-typography h4 {
+            font-size: 16px !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .salles-disponibles {
+            padding: 2px !important;
+          }
+          .ant-card {
+            margin-bottom: 8px !important;
+            border-radius: 8px !important;
+          }
+          .ant-card-body {
+            padding: 8px !important;
+          }
+          .ant-typography, .ant-typography h2, .ant-typography h3, .ant-typography h4 {
+            font-size: 14px !important;
+          }
         }
       `}</style>
       {/* Modale de réservation */}

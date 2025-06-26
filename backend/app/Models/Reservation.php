@@ -11,7 +11,7 @@ class Reservation extends Model
     protected $table = 'reservations';
     protected $fillable = [
         'salle_id',
-        'user_id',
+        'collaborateur_id',
         'date',
         'heure_debut',
         'heure_fin',

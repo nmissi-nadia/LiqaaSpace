@@ -30,7 +30,7 @@ const ResponsableLayout = () => {
     if (path.includes("dashboard")) return "1"
     if (path.includes("reservations")) return "2"
     if (path.includes("Msalles")) return "3"
-    if (path.includes("parametres")) return "4"
+    if (path.includes("disponibilite")) return "4"
     return "1"
   }
 
@@ -44,7 +44,7 @@ const ResponsableLayout = () => {
       case "3":
         return "Gestion des salles"
       case "4":
-        return "Paramètres"
+        return "Disponibilité"
       default:
         return "Tableau de bord"
     }
@@ -59,8 +59,8 @@ const ResponsableLayout = () => {
     {
       key: "settings",
       icon: <SettingOutlined />,
-      label: "Paramètres",
-      onClick: () => navigate("/responsable/parametres"),
+      label: "Disponibilité",
+      onClick: () => navigate("/responsable/disponibilite"),
     },
     {
       type: "divider",
@@ -139,10 +139,10 @@ const ResponsableLayout = () => {
               icon: <SettingOutlined className="text-emerald-600" />,
               label: (
                 <Link
-                  to="/responsable/parametres"
+                    to="/responsable/disponibilite"
                   className="text-slate-700 font-medium hover:text-emerald-600 transition-all duration-200"
                 >
-                  Paramètres
+                  Disponibilité
                 </Link>
               ),
               className: "mb-2 rounded-lg hover:bg-emerald-50",

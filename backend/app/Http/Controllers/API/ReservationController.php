@@ -61,21 +61,26 @@ class ReservationController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        echo "console.log($request->all());";
+        $validated = $request->validate([
             'salle_id' => 'required|exists:salles,id',
-            'heure_debut' => 'required|date',
-            'heure_fin' => 'required|date',
-            'motif' => 'required|string',
-            'statut' => 'required|string|in:confirmé,annulé',
+            'date' => 'required|date',
+            'heure_debut' => 'required|date_format:H:i',
+            'heure_fin' => 'required|date_format:H:i|after:heure_debut',
+            'motif' => 'required|string|max:255',
         ]);
-        $request->merge(['collaborateur_id' => auth()->user()->id]);
-        $reservation = Reservation::create($request->all());
-        $utilisateur = auth()->user();
-        Notification::send($utilisateur, new ReservationCreee($reservation));
-        return response()->json([
-            'message' => 'Reservation créée avec succès',
-            'data' => $reservation->with('salle', 'collaborateur')
-        ], 201);
+
+        $reservation = new Reservation();
+        $reservation->salle_id = $validated['salle_id'];
+        $reservation->date = $validated['date'];
+        $reservation->heure_debut = $validated['heure_debut'];
+        $reservation->heure_fin = $validated['heure_fin'];
+        $reservation->motif = $validated['motif'];
+        $reservation->collaborateur_id = auth()->id();
+        $reservation->statut = 'en attente'; // Valeur par défaut
+        $reservation->save();
+
+        return response()->json($reservation, 201);
     }
 
     /**
