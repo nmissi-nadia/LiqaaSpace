@@ -412,6 +412,7 @@ const SallesDisponibles = () => {
                       type="primary" 
                       icon={<EyeOutlined />}
                       size="small"
+                      onClick={() => navigate(`/collaborateur/detailsSalle/${salle.id}`)}
                       style={{
                         borderRadius: '6px',
                         background: 'linear-gradient(135deg, #52c41a 0%, #389e0d 100%)',

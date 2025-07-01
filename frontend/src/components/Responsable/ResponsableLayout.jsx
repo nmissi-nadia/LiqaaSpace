@@ -11,6 +11,7 @@ import {
   SettingOutlined,
   UserOutlined,
   BellOutlined,
+  MessageOutlined,
 } from "@ant-design/icons"
 import { Logo } from "../common/logo"
 
@@ -31,6 +32,7 @@ const ResponsableLayout = () => {
     if (path.includes("reservations")) return "2"
     if (path.includes("Msalles")) return "3"
     if (path.includes("disponibilite")) return "4"
+    if (path.includes("chat")) return "5"
     return "1"
   }
 
@@ -45,6 +47,8 @@ const ResponsableLayout = () => {
         return "Gestion des salles"
       case "4":
         return "Disponibilité"
+      case "5":
+        return "Chat"
       default:
         return "Tableau de bord"
     }
@@ -76,7 +80,7 @@ const ResponsableLayout = () => {
       },
     },
   ]
-
+  const [notifOpen, setNotifOpen] = useState(false);
   return (
     <Layout className="min-h-screen bg-gradient-to-br from-slate-50 to-emerald-50">
       <Sider
@@ -143,6 +147,19 @@ const ResponsableLayout = () => {
                   className="text-slate-700 font-medium hover:text-emerald-600 transition-all duration-200"
                 >
                   Disponibilité
+                </Link>
+              ),
+              className: "mb-2 rounded-lg hover:bg-emerald-50",
+            },
+            {
+              key: "5",
+              icon: <MessageOutlined className="text-emerald-600" />,
+              label: (
+                <Link
+                  to="/responsable/chat"
+                  className="text-slate-700 font-medium hover:text-emerald-600 transition-all duration-200"
+                >
+                  Chat
                 </Link>
               ),
               className: "mb-2 rounded-lg hover:bg-emerald-50",

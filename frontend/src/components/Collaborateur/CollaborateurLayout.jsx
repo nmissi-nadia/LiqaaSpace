@@ -10,16 +10,25 @@ import {
   MenuUnfoldOutlined,
   UserOutlined,
   BellOutlined,
+  MessageOutlined,
 } from "@ant-design/icons"
 import { Logo } from "../common/logo"
-
+import NotificationSidebar from "../../pages/NotificationSidebar";
 const { Header, Sider, Content } = Layout
 
 const CollaborateurLayout = () => {
   const [collapsed, setCollapsed] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
+  const [open, setOpen] = useState(false)
 
+  const showDrawer = () => {
+    setOpen(true)
+  }
+
+  const onClose = () => {
+    setOpen(false)
+  }
   const toggleCollapsed = () => {
     setCollapsed(!collapsed)
   }
@@ -28,6 +37,7 @@ const CollaborateurLayout = () => {
     const path = location.pathname
     if (path.includes("mesreservations")) return "2"
     if (path.includes("sallesdisponibles")) return "3"
+    if (path.includes("chat")) return "4"
     return "1"
   }
 
@@ -40,6 +50,8 @@ const CollaborateurLayout = () => {
         return "Mes Réservations"
       case "3":
         return "Salles Disponibles"
+      case "4":
+        return "Chat"
       default:
         return "Tableau de bord"
     }
@@ -65,7 +77,7 @@ const CollaborateurLayout = () => {
       },
     },
   ]
-
+  const [notifOpen, setNotifOpen] = useState(false);
   return (
     <Layout className="min-h-screen bg-gradient-to-br from-slate-50 to-emerald-50">
       <Sider
@@ -123,6 +135,19 @@ const CollaborateurLayout = () => {
               ),
               className: "mb-2 rounded-lg hover:bg-emerald-50",
             },
+            {
+              key: "4",
+              icon: <MessageOutlined className="text-emerald-600" />,
+              label: (
+                <Link
+                  to="/collaborateur/chat"
+                  className="text-slate-700 font-medium hover:text-emerald-600 transition-all duration-200"
+                >
+                  Chat
+                </Link>
+              ),
+              className: "mb-2 rounded-lg hover:bg-emerald-50",
+            },
           ]}
           theme="light"
         />
@@ -160,9 +185,13 @@ const CollaborateurLayout = () => {
           </div>
 
           <div className="flex items-center space-x-4">
-            <Badge count={3} size="small">
-              <BellOutlined className="text-slate-600 text-lg cursor-pointer hover:text-emerald-600 transition-colors" />
+          <Badge count={5} size="small">
+              <BellOutlined
+                className="text-slate-600 text-lg cursor-pointer hover:text-emerald-600 transition-colors"
+                onClick={() => setNotifOpen(true)}
+              />
             </Badge>
+            <NotificationSidebar open={notifOpen} onClose={() => setNotifOpen(false)} />
 
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" arrow>
               <div className="flex items-center space-x-2 cursor-pointer hover:bg-emerald-50 rounded-lg px-3 py-2 transition-all duration-200">

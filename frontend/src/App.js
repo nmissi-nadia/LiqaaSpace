@@ -3,7 +3,6 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import Layout from './components/layout/Layout';
 import AuthPage from './components/auth/AuthPage';
 import Dashboard from './pages/Home';
 import AdminDashboard from './components/Admin/Dashboard';
@@ -78,11 +77,10 @@ function App() {
             </Route>
 
             {/* Public Routes */}
-            <Route path="/" element={<Layout><Dashboard /></Layout>} />
-            <Route path="/salles" element={<Layout><Salles /></Layout>} />
+            
             
             {/* 404 Not Found */}
-            <Route path="*" element={<Layout><NotFound /></Layout>} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
       </AuthProvider>
     </ThemeProvider>

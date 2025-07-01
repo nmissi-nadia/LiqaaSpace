@@ -79,7 +79,8 @@ class ReservationController extends Controller
         $reservation->collaborateur_id = auth()->id();
         $reservation->statut = 'en attente'; // Valeur par défaut
         $reservation->save();
-
+        $user = User::find($reservation->collaborateur_id);
+        $user->notify(new ReservationCreee($reservation));
         return response()->json($reservation, 201);
     }
 

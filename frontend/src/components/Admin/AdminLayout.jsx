@@ -12,9 +12,10 @@ import {
   BellOutlined,
   LogoutOutlined,
   CloseOutlined,
+  MessageOutlined,
 } from "@ant-design/icons"
 import { Logo } from "../common/logo"
-
+import NotificationSidebar from "../../pages/NotificationSidebar";
 const { Header, Sider, Content } = Layout
 
 const menuItems = [
@@ -22,6 +23,7 @@ const menuItems = [
   { key: "2", text: "Utilisateurs", icon: <TeamOutlined />, path: "/admin/users" },
   { key: "3", text: "Salles", icon: <HomeOutlined />, path: "/admin/salles" },
   { key: "4", text: "Réservations", icon: <CalendarOutlined />, path: "/admin/reservations" },
+  { key: "5", text: "Chat", icon: <MessageOutlined />, path: "/admin/chat" },
 ]
 
 const AdminLayout = () => {
@@ -30,7 +32,15 @@ const AdminLayout = () => {
   const [isMobile, setIsMobile] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
+  const [open, setOpen] = useState(false)
 
+  const showDrawer = () => {
+    setOpen(true)
+  }
+
+  const onClose = () => {
+    setOpen(false)
+  }
   useEffect(() => {
     const checkScreenSize = () => {
       setIsMobile(window.innerWidth < 768)
@@ -54,12 +64,13 @@ const AdminLayout = () => {
 
   const getSelectedKey = () => {
     const currentItem = menuItems.find((item) => item.path === location.pathname)
+    if (currentItem?.path.includes("chat")) return "5"
     return currentItem?.key || "1"
   }
 
   const getCurrentPageTitle = () => {
     const currentItem = menuItems.find((item) => item.path === location.pathname)
-    return currentItem?.text || "Tableau de bord"
+      return currentItem?.text || "Tableau de bord"
   }
 
   const handleNavigation = (path) => {
@@ -89,7 +100,7 @@ const AdminLayout = () => {
       },
     },
   ]
-
+  const [notifOpen, setNotifOpen] = useState(false);
   return (
     <Layout className="min-h-screen bg-gradient-to-br from-slate-50 to-emerald-50">
       {/* Mobile Overlay */}
@@ -176,9 +187,13 @@ const AdminLayout = () => {
           </div>
 
           <div className="flex items-center space-x-4">
-            <Badge count={5} size="small">
-              <BellOutlined className="text-slate-600 text-lg cursor-pointer hover:text-emerald-600 transition-colors" />
+          <Badge count={5} size="small">
+              <BellOutlined
+                className="text-slate-600 text-lg cursor-pointer hover:text-emerald-600 transition-colors"
+                onClick={() => setNotifOpen(true)}
+              />
             </Badge>
+            <NotificationSidebar open={notifOpen} onClose={() => setNotifOpen(false)} />
 
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" arrow>
               <div className="flex items-center space-x-2 cursor-pointer hover:bg-emerald-50 rounded-lg px-3 py-2 transition-all duration-200">

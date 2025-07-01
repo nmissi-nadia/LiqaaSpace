@@ -1,0 +1,5 @@
+{
+    "require": {
+        "munafio/chatify": "^1.6"
+    }
+}

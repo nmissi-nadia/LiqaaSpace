@@ -34,4 +34,16 @@ class ReservationCreee extends Notification
             ->action('Voir mes réservations', url('/')) // Mets ici le lien vers le frontend
             ->line('Merci d\'utiliser notre plateforme !');
     }
+    public function toArray($notifiable)
+    {
+        return [
+            'title' => 'Nouvelle réservation',
+            'message' => 'Votre réservation pour la salle ' . $this->reservation->salle->nom . ' a été créée.',
+            'salle' => $this->reservation->salle->nom,
+            'date' => $this->reservation->date,
+            'heure_debut' => $this->reservation->heure_debut,
+            'heure_fin' => $this->reservation->heure_fin,
+            'reservation_id' => $this->reservation->id,
+        ];
+    }
 }

@@ -51,9 +51,45 @@ class User extends Authenticatable
     {
         return $this->hasMany(Salle::class);
     }
+
     // relation avec les reservations
     public function reservations()
     {
         return $this->hasMany(Reservation::class);
     }
+
+    /**
+     * Conversations où l'utilisateur est user1
+     */
+    public function conversationsAsUser1()
+    {
+        return $this->hasMany(Conversation::class, 'user1_id');
+    }
+
+    /**
+     * Conversations où l'utilisateur est user2
+     */
+    public function conversationsAsUser2()
+    {
+        return $this->hasMany(Conversation::class, 'user2_id');
+    }
+
+    /**
+     * Toutes les conversations de l'utilisateur
+     */
+    public function conversations()
+    {
+        return $this->conversationsAsUser1->merge($this->conversationsAsUser2);
+    }
+
+    /**
+     * Messages envoyés par l'utilisateur
+     */
+    public function sentMessages()
+    {
+        return $this->hasMany(Message::class, 'sender_id');
+    }
+
+   
+    
 }

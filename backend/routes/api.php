@@ -82,3 +82,32 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/{id}', [UserController::class, 'show']);
     });
 });
+
+Route::middleware('auth:sanctum')->get('/notifications', function (Request $request) {
+    return $request->user()->notifications()->orderBy('read_at')->get();
+});
+
+// Récupérer uniquement les notifications non lues
+Route::middleware('auth:sanctum')->get('/notifications/unread', function (Request $request) {
+    return $request->user()->unreadNotifications()->get();
+});
+
+// Marquer une notification comme lue
+Route::middleware('auth:sanctum')->post('/notifications/{id}/read', function ($id, Request $request) {
+    $notification = $request->user()->notifications()->findOrFail($id);
+    $notification->markAsRead();
+    return response()->json(['status' => 'ok']);
+});
+
+// Marquer toutes les notifications comme lues
+Route::middleware('auth:sanctum')->post('/notifications/read-all', function (Request $request) {
+    $request->user()->unreadNotifications->markAsRead();
+    return response()->json(['status' => 'all_read']);
+});
+
+// Supprimer une notification
+Route::middleware('auth:sanctum')->delete('/notifications/{id}', function ($id, Request $request) {
+    $notification = $request->user()->notifications()->findOrFail($id);
+    $notification->delete();
+    return response()->json(['status' => 'deleted']);
+});
