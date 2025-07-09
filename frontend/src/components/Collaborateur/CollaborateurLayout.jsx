@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom"
 import { Layout, Menu, Avatar, Dropdown, Badge } from "antd"
 import {
@@ -14,13 +14,16 @@ import {
 } from "@ant-design/icons"
 import { Logo } from "../common/logo"
 import NotificationSidebar from "../../pages/NotificationSidebar";
+import { useAuth } from "../../contexts/AuthContext";
 const { Header, Sider, Content } = Layout
 
 const CollaborateurLayout = () => {
+  const [loading, setLoading] = useState(true)
   const [collapsed, setCollapsed] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
+  const {user} = useAuth();
 
   const showDrawer = () => {
     setOpen(true)
@@ -41,6 +44,8 @@ const CollaborateurLayout = () => {
     return "1"
   }
 
+
+  
   const getPageTitle = () => {
     const key = getSelectedKey()
     switch (key) {
@@ -161,7 +166,7 @@ const CollaborateurLayout = () => {
               </Avatar>
               {!collapsed && (
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-700 truncate">Collaborateur</p>
+                  <p className="text-sm font-medium text-slate-700 truncate">{user && user.name}</p>
                   <p className="text-xs text-slate-500 truncate">En ligne</p>
                 </div>
               )}
@@ -185,21 +190,14 @@ const CollaborateurLayout = () => {
           </div>
 
           <div className="flex items-center space-x-4">
-          <Badge count={5} size="small">
-              <BellOutlined
-                className="text-slate-600 text-lg cursor-pointer hover:text-emerald-600 transition-colors"
-                onClick={() => setNotifOpen(true)}
-              />
-            </Badge>
-            <NotificationSidebar open={notifOpen} onClose={() => setNotifOpen(false)} />
-
+            {user && <NotificationSidebar userId={user.id} />}
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" arrow>
               <div className="flex items-center space-x-2 cursor-pointer hover:bg-emerald-50 rounded-lg px-3 py-2 transition-all duration-200">
                 <Avatar size={32} className="bg-emerald-500">
                   <UserOutlined />
                 </Avatar>
                 <div className="hidden sm:block">
-                  <p className="text-sm font-medium text-slate-700">Collaborateur</p>
+                  <p className="text-sm font-medium text-slate-700">{user?.name}</p>
                 </div>
               </div>
             </Dropdown>
@@ -207,7 +205,7 @@ const CollaborateurLayout = () => {
         </Header>
 
         <Content className="m-6">
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl shadow-emerald-500/5 border border-emerald-100 p-6 min-h-[calc(100vh-8rem)]">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl shadow-emerald-500/5 border border-emerald-100 p-6 z-10 min-h-[calc(100vh-8rem)]">
             <Outlet />
           </div>
         </Content>

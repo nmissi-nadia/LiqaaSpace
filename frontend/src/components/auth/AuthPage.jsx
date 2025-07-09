@@ -123,13 +123,7 @@ const AuthPage = () => {
                 </button>
               </p>
             </div>
-            {/* Info démo */}
-            <div className="mt-8 p-4 bg-emerald-50 rounded-xl border border-emerald-200">
-              <h3 className="text-sm font-semibold text-emerald-800 mb-2">Mode Démo</h3>
-              <p className="text-xs text-emerald-600">
-                Connexion test: <strong>admin@test.com</strong> / <strong>password</strong>
-              </p>
-            </div>
+            
             {/* Décoration */}
             <div className="mt-6 flex justify-center">
               <div className="flex space-x-2">

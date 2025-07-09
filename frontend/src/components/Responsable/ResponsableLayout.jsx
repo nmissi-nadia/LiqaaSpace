@@ -14,6 +14,7 @@ import {
   MessageOutlined,
 } from "@ant-design/icons"
 import { Logo } from "../common/logo"
+import NotificationSidebar from "../../pages/NotificationSidebar";
 
 const { Header, Sider, Content } = Layout
 
@@ -21,7 +22,16 @@ const ResponsableLayout = () => {
   const [collapsed, setCollapsed] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
+  
+  const [open, setOpen] = useState(false)
+  const showDrawer = () => {
+    setOpen(true)
+  }
 
+  const onClose = () => {
+    setOpen(false)
+  }
+  
   const toggleCollapsed = () => {
     setCollapsed(!collapsed)
   }
@@ -201,9 +211,13 @@ const ResponsableLayout = () => {
           </div>
 
           <div className="flex items-center space-x-4">
-            <Badge count={7} size="small">
-              <BellOutlined className="text-slate-600 text-lg cursor-pointer hover:text-emerald-600 transition-colors" />
+          <Badge count={5} size="small">
+              <BellOutlined
+                className="text-slate-600 text-lg cursor-pointer hover:text-emerald-600 transition-colors"
+                onClick={() => setNotifOpen(true)}
+              />
             </Badge>
+            <NotificationSidebar open={notifOpen} onClose={() => setNotifOpen(false)} />
 
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" arrow>
               <div className="flex items-center space-x-2 cursor-pointer hover:bg-emerald-50 rounded-lg px-3 py-2 transition-all duration-200">

@@ -8,7 +8,9 @@ use App\Http\Controllers\API\ReservationController;
 use App\Http\Controllers\API\DisponibiliteController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\StatsController;
-
+use App\Http\Controllers\API\NotificationController;
+use App\Http\Controllers\API\MessageController;
+use Illuminate\Support\Facades\Broadcast;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -110,4 +112,16 @@ Route::middleware('auth:sanctum')->delete('/notifications/{id}', function ($id, 
     $notification = $request->user()->notifications()->findOrFail($id);
     $notification->delete();
     return response()->json(['status' => 'deleted']);
+});
+
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/send-notification', [NotificationController::class, 'sendNotification']);
+});
+
+Broadcast::routes(['middleware' => ['auth:sanctum']]);
+
+Route::middleware('auth:api')->group(function () {
+    Route::get('/messages', [MessageController::class, 'index']);
+    Route::post('/messages', [MessageController::class, 'store']);
 });

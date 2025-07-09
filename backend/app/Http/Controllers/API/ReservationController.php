@@ -61,7 +61,6 @@ class ReservationController extends Controller
      */
     public function store(Request $request)
     {
-        echo "console.log($request->all());";
         $validated = $request->validate([
             'salle_id' => 'required|exists:salles,id',
             'date' => 'required|date',

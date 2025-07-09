@@ -32,7 +32,8 @@ const CollaborateurDashboard = () => {
   const [error, setError] = useState(null)
   const [reunionsAVenir, setReunionsAVenir] = useState([])
   const [sallesDisponibles, setSallesDisponibles] = useState([])
-  const [user, setUser] = useState(null)
+  const [user,setUser ] = useState(null);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -182,7 +183,7 @@ const CollaborateurDashboard = () => {
                     fontWeight: "bold",
                   }}
                 >
-                  Bonjour {user?.name || "Collaborateur"} !
+                  Bonjour !
                 </Title>
                 <Text type="secondary" style={{ fontSize: "16px" }}>
                   Bienvenue dans votre espace personnel
@@ -421,7 +422,7 @@ const CollaborateurDashboard = () => {
                           transition: "all 0.2s ease",
                         }}
                         className="hover:bg-emerald-50"
-                        onClick={() => navigate(`/collaborateur/reunion/${reunion.id}`)}
+                        onClick={() => navigate(`/collaborateur/reservations/${reunion.id}`)}
                       >
                         <div style={{ flex: 1 }}>
                           <div style={{ display: "flex", alignItems: "center", marginBottom: "8px" }}>

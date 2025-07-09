@@ -37,6 +37,7 @@ import { format, parseISO } from "date-fns"
 import { fr } from "date-fns/locale"
 import moment from "moment"
 import axios from "axios"
+import api from "../../services/api"
 
 const { Title, Text } = Typography
 const { TextArea } = Input
@@ -80,7 +81,7 @@ const MesReservations = () => {
   const fetchReservations = async () => {
     try {
       setLoading(true)
-      const response = await axios.get(`http://localhost:8000/api/reservations/collaborateur`, {
+      const response = await api.get(`/api/reservations/collaborateur`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
@@ -96,7 +97,7 @@ const MesReservations = () => {
 
   const fetchSalles = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/api/salles", {
+      const response = await api.get("/api/salles", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
@@ -165,11 +166,16 @@ const MesReservations = () => {
       }
 
       if (editingReservation) {
-        await axios.put(`http://localhost:8000/api/reservations/${editingReservation}`, data, config)
+        await api.put(`/api/reservations/${editingReservation}`, data, config)
         message.success("Réservation modifiée avec succès")
       } else {
         console.log(data)
-        await axios.post("http://localhost:8000/api/reservations", data, config)
+        await api.post('/api/reservations', data, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+            'Accept': 'application/json',
+          }
+        })
         message.success("Réservation créée avec succès")
       }
 
@@ -185,7 +191,7 @@ const MesReservations = () => {
 
   const handleDeleteReservation = async (id) => {
     try {
-      await axios.delete(`http://localhost:8000/api/reservations/${id}`,{
+      await api.delete(`/api/reservations/${id}`,{
         headers: {
           'Authorization': `Bearer ${localStorage.getItem("access_token")}`,
           'Accept': 'application/json'
