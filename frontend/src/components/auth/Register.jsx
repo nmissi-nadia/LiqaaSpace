@@ -1,199 +1,267 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import {
-  Container,
-  TextField,
-  Button,
-  Typography,
-  Box,
-  Link as MuiLink,
-  Paper,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  FormHelperText
-} from '@mui/material';
+"use client"
 
-function Register() {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    password_confirmation: '',
-    role: 'collaborateur'
-  });
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { Form, Input, Button, Select, Alert, message, Divider } from "antd"
+import { UserOutlined, MailOutlined, LockOutlined, TeamOutlined } from "@ant-design/icons"
+import { useAuth } from "../../contexts/AuthContext"
 
-  const [errors, setErrors] = useState({});
-  const { register, loading, error } = useAuth();
-  const navigate = useNavigate();
+const { Option } = Select
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value.trimStart() // trimStart pour éviter les espaces au début
-    }));
-    if (errors[name]) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[name];
-        return newErrors;
-      });
+const Register = () => {
+  const [form] = Form.useForm()
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const { register } = useAuth()
+  const navigate = useNavigate()
+
+  const onFinish = async (values) => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      const success = await register(values)
+      if (success) {
+        message.success("Inscription réussie ! Bienvenue dans OCP LiqaaSpace.")
+        navigate("/")
+      }
+    } catch (error) {
+      console.error("Erreur d'inscription:", error)
+
+      if (error.response?.data?.errors) {
+        // Gestion des erreurs de validation
+        const errors = error.response.data.errors
+        Object.entries(errors).forEach(([field, messages]) => {
+          form.setFields([
+            {
+              name: field,
+              errors: [messages[0]],
+            },
+          ])
+        })
+      } else {
+        const errorMessage = error.response?.data?.message || "Une erreur est survenue lors de l'inscription"
+        setError(errorMessage)
+      }
+    } finally {
+      setLoading(false)
     }
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-
-    if (!formData.name.trim()) newErrors.name = 'Le nom est requis.';
-    if (!formData.email.trim()) {
-      newErrors.email = 'L’adresse email est requise.';
-    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(formData.email)) {
-      newErrors.email = 'Adresse email invalide.';
-    }
-
-    if (!formData.password) {
-      newErrors.password = 'Le mot de passe est requis.';
-    } else if (formData.password.length < 8) {
-      newErrors.password = 'Le mot de passe doit contenir au moins 8 caractères.';
-    }
-
-    if (formData.password !== formData.password_confirmation) {
-      newErrors.password_confirmation = 'Les mots de passe ne correspondent pas.';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-
-    const success = await register(formData);
-    if (success) {
-      navigate('/');
-    }
-  };
+  }
 
   return (
-    <Container component="main" maxWidth="xs">
-      <Paper elevation={3} sx={{ p: 4, mt: 8 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
+    <div style={{ maxWidth: "400px", margin: "0 auto" }}>
+      {error && (
+        <Alert
+          message="Erreur d'inscription"
+          description={error}
+          type="error"
+          showIcon
+          style={{
+            marginBottom: "24px",
+            borderRadius: "12px",
+            border: "1px solid #fecaca",
+            background: "#fef2f2",
           }}
-        >
-          <Typography component="h1" variant="h5">
-            Créer un compte
-          </Typography>
+          closable
+          onClose={() => setError(null)}
+        />
+      )}
 
-          <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1, width: '100%' }}>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="name"
-              label="Nom complet"
-              name="name"
-              autoComplete="name"
-              autoFocus
-              value={formData.name}
-              onChange={handleChange}
-              error={!!errors.name}
-              helperText={errors.name}
+      <div
+        style={{
+          background: "white",
+          padding: "32px",
+          borderRadius: "16px",
+          border: "2px solid #10b981",
+          boxShadow: "0 8px 32px rgba(16, 185, 129, 0.15)",
+        }}
+      >
+        <Form form={form} name="register" onFinish={onFinish} layout="vertical" size="large">
+          <Form.Item
+            name="name"
+            label={<span style={{ color: "#374151", fontWeight: "500" }}>Nom complet</span>}
+            rules={[
+              {
+                required: true,
+                message: "Veuillez saisir votre nom !",
+              },
+              {
+                min: 2,
+                message: "Le nom doit contenir au moins 2 caractères !",
+              },
+            ]}
+          >
+            <Input
+              prefix={<UserOutlined style={{ color: "#10b981" }} />}
+              placeholder="Votre nom complet"
+              style={{
+                borderRadius: "8px",
+                height: "48px",
+                borderColor: "#d1fae5",
+                background: "#f0fdf4",
+              }}
             />
+          </Form.Item>
 
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Adresse email"
-              name="email"
-              autoComplete="email"
-              value={formData.email}
-              onChange={handleChange}
-              error={!!errors.email}
-              helperText={errors.email}
+          <Form.Item
+            name="email"
+            label={<span style={{ color: "#374151", fontWeight: "500" }}>Adresse email OCP</span>}
+            rules={[
+              {
+                required: true,
+                message: "Veuillez saisir votre email OCP !",
+              },
+              {
+                type: "email",
+                message: "Format d'email invalide !",
+              },
+            ]}
+          >
+            <Input
+              prefix={<MailOutlined style={{ color: "#10b981" }} />}
+              placeholder="votre.nom@ocpgroup.ma"
+              style={{
+                borderRadius: "8px",
+                height: "48px",
+                borderColor: "#d1fae5",
+                background: "#f0fdf4",
+              }}
             />
+          </Form.Item>
 
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Mot de passe"
-              type="password"
-              id="password"
-              autoComplete="new-password"
-              value={formData.password}
-              onChange={handleChange}
-              error={!!errors.password}
-              helperText={errors.password}
+          <Form.Item
+            name="password"
+            label={<span style={{ color: "#374151", fontWeight: "500" }}>Mot de passe</span>}
+            rules={[
+              {
+                required: true,
+                message: "Veuillez saisir votre mot de passe !",
+              },
+              {
+                min: 8,
+                message: "Le mot de passe doit contenir au moins 8 caractères !",
+              },
+            ]}
+          >
+            <Input.Password
+              prefix={<LockOutlined style={{ color: "#10b981" }} />}
+              placeholder="Votre mot de passe"
+              style={{
+                borderRadius: "8px",
+                height: "48px",
+                borderColor: "#d1fae5",
+                background: "#f0fdf4",
+              }}
             />
+          </Form.Item>
 
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password_confirmation"
-              label="Confirmer le mot de passe"
-              type="password"
-              id="password_confirmation"
-              value={formData.password_confirmation}
-              onChange={handleChange}
-              error={!!errors.password_confirmation}
-              helperText={errors.password_confirmation}
+          <Form.Item
+            name="password_confirmation"
+            label={<span style={{ color: "#374151", fontWeight: "500" }}>Confirmer le mot de passe</span>}
+            dependencies={["password"]}
+            rules={[
+              {
+                required: true,
+                message: "Veuillez confirmer votre mot de passe !",
+              },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue("password") === value) {
+                    return Promise.resolve()
+                  }
+                  return Promise.reject(new Error("Les mots de passe ne correspondent pas !"))
+                },
+              }),
+            ]}
+          >
+            <Input.Password
+              prefix={<LockOutlined style={{ color: "#10b981" }} />}
+              placeholder="Confirmez votre mot de passe"
+              style={{
+                borderRadius: "8px",
+                height: "48px",
+                borderColor: "#d1fae5",
+                background: "#f0fdf4",
+              }}
             />
+          </Form.Item>
 
-            <FormControl fullWidth margin="normal" error={!!errors.role}>
-              <InputLabel id="role-label">Rôle</InputLabel>
-              <Select
-                labelId="role-label"
-                id="role"
-                name="role"
-                value={formData.role}
-                label="Rôle"
-                onChange={handleChange}
-              >
-                <MenuItem value="collaborateur">Collaborateur</MenuItem>
-                <MenuItem value="responsable">Responsable</MenuItem>
-              </Select>
-              {errors.role && <FormHelperText>{errors.role}</FormHelperText>}
-            </FormControl>
-
-            {error && (
-              <Typography color="error" variant="body2" sx={{ mt: 2 }}>
-                {typeof error === 'string' ? error : 'Une erreur est survenue lors de l’inscription'}
-              </Typography>
-            )}
-
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-              disabled={loading}
-              aria-label="S'inscrire"
+          <Form.Item
+            name="role"
+            label={<span style={{ color: "#374151", fontWeight: "500" }}>Rôle dans OCP</span>}
+            initialValue="collaborateur"
+            rules={[
+              {
+                required: true,
+                message: "Veuillez sélectionner votre rôle !",
+              },
+            ]}
+          >
+            <Select
+              placeholder="Sélectionnez votre rôle"
+              style={{
+                borderRadius: "8px",
+              }}
+              suffixIcon={<TeamOutlined style={{ color: "#10b981" }} />}
             >
-              {loading ? 'Inscription en cours...' : 'S’inscrire'}
-            </Button>
+              <Option value="collaborateur">
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <UserOutlined style={{ color: "#10b981" }} />
+                  Collaborateur OCP
+                </div>
+              </Option>
+              <Option value="responsable">
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <TeamOutlined style={{ color: "#10b981" }} />
+                  Responsable OCP
+                </div>
+              </Option>
+            </Select>
+          </Form.Item>
 
-            <Box sx={{ textAlign: 'center', mt: 2 }}>
-              <MuiLink component={Link} to="/login" variant="body2">
-                Déjà un compte ? Connectez-vous
-              </MuiLink>
-            </Box>
-          </Box>
-        </Box>
-      </Paper>
-    </Container>
-  );
+          <Form.Item style={{ marginBottom: "16px" }}>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={loading}
+              block
+              style={{
+                height: "48px",
+                borderRadius: "8px",
+                background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                border: "none",
+                fontSize: "16px",
+                fontWeight: "600",
+                boxShadow: "0 4px 16px rgba(16, 185, 129, 0.3)",
+              }}
+            >
+              {loading ? "Inscription en cours..." : "Rejoindre OCP LiqaaSpace"}
+            </Button>
+          </Form.Item>
+
+          <Divider style={{ borderColor: "#d1fae5" }} />
+
+          <div style={{ textAlign: "center" }}>
+            <p style={{ color: "#6b7280", fontSize: "14px", margin: 0 }}>
+              En vous inscrivant, vous acceptez les{" "}
+              <Button
+                type="link"
+                style={{
+                  color: "#10b981",
+                  padding: "0",
+                  height: "auto",
+                  fontSize: "14px",
+                  fontWeight: "500",
+                }}
+              >
+                conditions d'utilisation OCP
+              </Button>
+            </p>
+          </div>
+        </Form>
+      </div>
+    </div>
+  )
 }
 
-export default Register;
+export default Register

@@ -1,144 +1,434 @@
-import React, { useState } from 'react';
-import { ArrowRight, User, UserPlus, CheckCircle, Shield, Clock } from 'lucide-react';
-import Login from './Login';
-import Register from './Register';
+"use client"
 
-// Simuler l'image de la salle de réunion
-const meetingImageUrl = "https://images.unsplash.com/photo-1560439514-4e9645039924?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80";
+import { useState } from "react"
+import { Button, Space, Typography } from "antd"
+import {
+  UserOutlined,
+  UserAddOutlined,
+  CheckCircleOutlined,
+  SafetyOutlined as ShieldCheckOutlined,
+  ClockCircleOutlined,
+  ArrowRightOutlined,
+} from "@ant-design/icons"
+import Login from "./Login"
+import Register from "./Register"
+import Logo from "../common/logo"
+
+const { Title, Text } = Typography
 
 const AuthPage = () => {
-  const [isLogin, setIsLogin] = useState(true);
-  const [isAnimating, setIsAnimating] = useState(false);
+  const [isLogin, setIsLogin] = useState(true)
+  const [isAnimating, setIsAnimating] = useState(false)
 
   const toggleForm = () => {
-    setIsAnimating(true);
+    setIsAnimating(true)
     setTimeout(() => {
-      setIsLogin(!isLogin);
-      setIsAnimating(false);
-    }, 200);
-  };
+      setIsLogin(!isLogin)
+      setIsAnimating(false)
+    }, 200)
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-green-50 flex items-center justify-center p-4">
-      <div className="max-w-6xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden relative">
-        {/* Effets de fond décoratifs */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-emerald-200 to-green-300 rounded-full blur-3xl opacity-20 transform translate-x-16 -translate-y-16"></div>
-        <div className="absolute bottom-0 left-0 w-40 h-40 bg-gradient-to-tr from-green-200 to-emerald-300 rounded-full blur-3xl opacity-20 transform -translate-x-20 translate-y-20"></div>
-        <div className="flex flex-col lg:flex-row min-h-[700px]">
-          {/* Section Image */}
-          <div className="lg:flex-1 relative overflow-hidden">
-            <div 
-              className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: `url(${meetingImageUrl})` }}
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "linear-gradient(135deg, #ffffff 0%, #f0fdf4 50%, #ffffff 100%)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "16px",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      {/* Effets de fond décoratifs verts */}
+      <div
+        style={{
+          position: "absolute",
+          top: "-50px",
+          right: "-50px",
+          width: "200px",
+          height: "200px",
+          background: "radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%)",
+          borderRadius: "50%",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          bottom: "-50px",
+          left: "-50px",
+          width: "250px",
+          height: "250px",
+          background: "radial-gradient(circle, rgba(5, 150, 105, 0.08) 0%, transparent 70%)",
+          borderRadius: "50%",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          top: "20%",
+          left: "10%",
+          width: "100px",
+          height: "100px",
+          background: "radial-gradient(circle, rgba(16, 185, 129, 0.05) 0%, transparent 70%)",
+          borderRadius: "50%",
+        }}
+      />
+
+      <div
+        style={{
+          maxWidth: "1200px",
+          width: "100%",
+          background: "rgba(255, 255, 255, 0.98)",
+          borderRadius: "24px",
+          boxShadow: "0 25px 50px rgba(16, 185, 129, 0.15)",
+          backdropFilter: "blur(20px)",
+          overflow: "hidden",
+          position: "relative",
+          border: "1px solid rgba(16, 185, 129, 0.1)",
+        }}
+      >
+        {/* Bordure verte en haut */}
+        <div
+          style={{
+            position: "absolute",
+            top: "0",
+            left: "0",
+            right: "0",
+            height: "4px",
+            background: "linear-gradient(90deg, #10b981 0%, #059669 50%, #10b981 100%)",
+          }}
+        />
+
+        <div style={{ display: "flex", minHeight: "700px" }}>
+          {/* Section Image/Présentation - Fond vert */}
+          <div
+            style={{
+              flex: 1,
+              background: "linear-gradient(135deg, #10b981 0%, #059669 50%,rgb(4, 189, 102) 100%)",
+              position: "relative",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              padding: "48px",
+              color: "white",
+              overflow: "hidden",
+            }}
+          >
+            {/* Éléments décoratifs blancs */}
+            <div
+              style={{
+                position: "absolute",
+                top: "40px",
+                left: "40px",
+                width: "80px",
+                height: "80px",
+                border: "2px solid rgba(255, 255, 255, 0.2)",
+                borderRadius: "50%",
+              }}
             />
-            <div className="absolute inset-0 bg-gradient-to-br from-emerald-600/90 via-green-500/85 to-emerald-700/90"></div>
-            <div className="absolute inset-0">
-              <div className="absolute top-10 left-10 w-20 h-20 border-2 border-white/20 rounded-full"></div>
-              <div className="absolute bottom-20 right-10 w-16 h-16 border-2 border-white/20 rounded-full"></div>
-              <div className="absolute top-1/3 right-20 w-2 h-2 bg-white/40 rounded-full"></div>
-              <div className="absolute bottom-1/3 left-20 w-3 h-3 bg-white/30 rounded-full"></div>
-            </div>
-            <div className="relative z-10 h-full flex flex-col justify-center p-8 lg:p-12 text-white">
-              <div className="max-w-md">
-                <div className="mb-6">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl mb-6">
-                    {isLogin ? <User className="w-8 h-8" /> : <UserPlus className="w-8 h-8" />}
-                  </div>
-                </div>
-                <h1 className="text-4xl lg:text-5xl font-bold mb-6 leading-tight">
-                  {isLogin ? 'Content de vous revoir !' : 'Rejoignez-nous'}
-                </h1>
-                <p className="text-xl text-white/90 mb-8 leading-relaxed">
-                  {isLogin 
-                    ? 'Connectez-vous pour accéder à votre espace personnel et gérer vos réservations' 
-                    : 'Créez un compte pour réserver des salles de réunion et collaborer efficacement'}
-                </p>
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
-                      <CheckCircle className="w-4 h-4" />
-                    </div>
-                    <span className="text-white/90">Réservation en temps réel</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
-                      <Shield className="w-4 h-4" />
-                    </div>
-                    <span className="text-white/90">Sécurisé et fiable</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
-                      <Clock className="w-4 h-4" />
-                    </div>
-                    <span className="text-white/90">Disponible 24h/24</span>
-                  </div>
+            <div
+              style={{
+                position: "absolute",
+                bottom: "80px",
+                right: "40px",
+                width: "64px",
+                height: "64px",
+                border: "2px solid rgba(255, 255, 255, 0.2)",
+                borderRadius: "50%",
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                top: "33%",
+                right: "80px",
+                width: "8px",
+                height: "8px",
+                background: "rgba(255, 255, 255, 0.4)",
+                borderRadius: "50%",
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                bottom: "33%",
+                left: "80px",
+                width: "12px",
+                height: "12px",
+                background: "rgba(255, 255, 255, 0.3)",
+                borderRadius: "50%",
+              }}
+            />
+
+            <div style={{ maxWidth: "400px", zIndex: 10 }}>
+              {/* Logo OCP en haut */}
+              <div style={{ marginBottom: "32px" }}>
+                <Logo size="xlarge" white={true} />
+              </div>
+
+              <div style={{ marginBottom: "24px" }}>
+                <div
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "64px",
+                    height: "64px",
+                    background: "rgba(255, 255, 255, 0.2)",
+                    backdropFilter: "blur(10px)",
+                    borderRadius: "16px",
+                    marginBottom: "24px",
+                  }}
+                >
+                  {isLogin ? (
+                    <UserOutlined style={{ fontSize: "32px" }} />
+                  ) : (
+                    <UserAddOutlined style={{ fontSize: "32px" }} />
+                  )}
                 </div>
               </div>
+
+              <Title
+                level={1}
+                style={{
+                  color: "white",
+                  fontSize: "48px",
+                  fontWeight: "bold",
+                  marginBottom: "24px",
+                  lineHeight: "1.2",
+                }}
+              >
+                {isLogin ? "Bienvenue !" : "Rejoignez OCP"}
+              </Title>
+
+              <Text
+                style={{
+                  color: "rgba(255, 255, 255, 0.9)",
+                  fontSize: "20px",
+                  lineHeight: "1.6",
+                  marginBottom: "32px",
+                  display: "block",
+                }}
+              >
+                {isLogin
+                  ? "Connectez-vous à votre espace LiqaaSpace pour gérer vos réservations de salles"
+                  : "Créez votre compte OCP LiqaaSpace pour réserver des salles de réunion"}
+              </Text>
+
+              <Space direction="vertical" size="large">
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                  <div
+                    style={{
+                      width: "32px",
+                      height: "32px",
+                      background: "rgba(255, 255, 255, 0.2)",
+                      backdropFilter: "blur(10px)",
+                      borderRadius: "8px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <CheckCircleOutlined style={{ fontSize: "16px" }} />
+                  </div>
+                  <Text style={{ color: "rgba(255, 255, 255, 0.9)", fontSize: "16px" }}>Réservation instantanée</Text>
+                </div>
+
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                  <div
+                    style={{
+                      width: "32px",
+                      height: "32px",
+                      background: "rgba(255, 255, 255, 0.2)",
+                      backdropFilter: "blur(10px)",
+                      borderRadius: "8px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <ShieldCheckOutlined style={{ fontSize: "16px" }} />
+                  </div>
+                  <Text style={{ color: "rgba(255, 255, 255, 0.9)", fontSize: "16px" }}>Plateforme sécurisée OCP</Text>
+                </div>
+
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                  <div
+                    style={{
+                      width: "32px",
+                      height: "32px",
+                      background: "rgba(255, 255, 255, 0.2)",
+                      backdropFilter: "blur(10px)",
+                      borderRadius: "8px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <ClockCircleOutlined style={{ fontSize: "16px" }} />
+                  </div>
+                  <Text style={{ color: "rgba(255, 255, 255, 0.9)", fontSize: "16px" }}>Accès 24h/24 7j/7</Text>
+                </div>
+              </Space>
             </div>
           </div>
-          {/* Section Formulaire */}
-          <div className="lg:flex-1 relative p-8 lg:p-12 flex flex-col justify-center">
+
+          {/* Section Formulaire - Fond blanc */}
+          <div
+            style={{
+              flex: 1,
+              padding: "48px",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              position: "relative",
+              background: "white",
+            }}
+          >
             {/* Bouton de basculement */}
-            <button
+            <Button
               onClick={toggleForm}
-              className="absolute top-6 right-6 px-6 py-2 border-2 border-emerald-500 text-emerald-600 rounded-xl font-medium hover:bg-emerald-50 transition-all duration-300 flex items-center gap-2 group"
+              style={{
+                position: "absolute",
+                top: "24px",
+                right: "24px",
+                borderColor: "#10b981",
+                color: "#10b981",
+                borderRadius: "12px",
+                height: "40px",
+                paddingLeft: "24px",
+                paddingRight: "24px",
+                fontWeight: "500",
+                background: "white",
+              }}
+              icon={<ArrowRightOutlined />}
             >
-              {isLogin ? "S'inscrire" : 'Se connecter'}
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </button>
-            <div className="text-center mb-8">
-              <div className="mb-4">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-emerald-100 to-green-100 rounded-2xl mb-4">
-                  {isLogin ? <User className="w-8 h-8 text-emerald-600" /> : <UserPlus className="w-8 h-8 text-emerald-600" />}
+              {isLogin ? "S'inscrire" : "Se connecter"}
+            </Button>
+
+            {/* En-tête du formulaire */}
+            <div style={{ textAlign: "center", marginBottom: "32px" }}>
+              {/* Logo OCP plus petit */}
+              <div style={{ marginBottom: "24px" }}>
+                <Logo size="medium" />
+              </div>
+
+              <div style={{ marginBottom: "16px" }}>
+                <div
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "64px",
+                    height: "64px",
+                    background: "linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%)",
+                    borderRadius: "16px",
+                    marginBottom: "16px",
+                  }}
+                >
+                  {isLogin ? (
+                    <UserOutlined style={{ fontSize: "32px", color: "#10b981" }} />
+                  ) : (
+                    <UserAddOutlined style={{ fontSize: "32px", color: "#10b981" }} />
+                  )}
                 </div>
               </div>
-              <h2 className="text-3xl font-bold text-gray-800 mb-2">
-                {isLogin ? 'Connexion' : 'Inscription'}
-              </h2>
-              <p className="text-gray-600">
-                {isLogin 
-                  ? 'Entrez vos identifiants pour vous connecter' 
-                  : 'Créez votre compte en quelques secondes'}
-              </p>
+
+              <Title
+                level={2}
+                style={{
+                  color: "#1f2937",
+                  marginBottom: "8px",
+                  fontSize: "32px",
+                  fontWeight: "bold",
+                }}
+              >
+                {isLogin ? "Connexion" : "Inscription"}
+              </Title>
+
+              <Text type="secondary" style={{ fontSize: "16px" }}>
+                {isLogin ? "Accédez à votre espace OCP LiqaaSpace" : "Créez votre compte OCP LiqaaSpace"}
+              </Text>
             </div>
+
             {/* Zone de formulaire avec animation */}
-            <div className="relative">
-              <div 
-                className={`transition-all duration-300 ${
-                  isAnimating ? 'opacity-0 transform scale-95' : 'opacity-100 transform scale-100'
-                }`}
+            <div style={{ position: "relative" }}>
+              <div
+                style={{
+                  transition: "all 0.3s ease",
+                  opacity: isAnimating ? 0 : 1,
+                  transform: isAnimating ? "scale(0.95)" : "scale(1)",
+                }}
               >
                 {isLogin ? <Login /> : <Register />}
               </div>
             </div>
+
             {/* Lien alternatif */}
-            <div className="text-center mt-8">
-              <p className="text-gray-600">
-                {isLogin ? "Pas encore de compte ?" : "Déjà un compte ?"}
-                <button
+            <div style={{ textAlign: "center", marginTop: "32px" }}>
+              <Text type="secondary">
+                {isLogin ? "Nouveau chez OCP LiqaaSpace ?" : "Déjà membre OCP ?"}
+                <Button
+                  type="link"
                   onClick={toggleForm}
-                  className="ml-2 text-emerald-600 font-semibold hover:text-emerald-700 transition-colors"
+                  style={{
+                    color: "#10b981",
+                    fontWeight: "600",
+                    padding: "0 8px",
+                  }}
                 >
                   {isLogin ? "Créer un compte" : "Se connecter"}
-                </button>
-              </p>
+                </Button>
+              </Text>
             </div>
-            
-            {/* Décoration */}
-            <div className="mt-6 flex justify-center">
-              <div className="flex space-x-2">
-                <div className="w-2 h-2 bg-emerald-200 rounded-full"></div>
-                <div className="w-2 h-2 bg-emerald-300 rounded-full"></div>
-                <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
+
+            {/* Décoration verte */}
+            <div style={{ marginTop: "24px", display: "flex", justifyContent: "center" }}>
+              <div style={{ display: "flex", gap: "8px" }}>
+                <div
+                  style={{
+                    width: "8px",
+                    height: "8px",
+                    background: "rgba(16, 185, 129, 0.3)",
+                    borderRadius: "50%",
+                  }}
+                />
+                <div
+                  style={{
+                    width: "8px",
+                    height: "8px",
+                    background: "rgba(16, 185, 129, 0.5)",
+                    borderRadius: "50%",
+                  }}
+                />
+                <div
+                  style={{
+                    width: "8px",
+                    height: "8px",
+                    background: "#10b981",
+                    borderRadius: "50%",
+                  }}
+                />
               </div>
             </div>
           </div>
         </div>
-        {/* Vague décorative en bas */}
-        <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-emerald-500 via-green-400 to-emerald-500"></div>
+
+        <div
+          style={{
+            position: "absolute",
+            bottom: "0",
+            left: "0",
+            right: "0",
+            height: "4px",
+            background: "linear-gradient(90deg, #10b981 0%, #059669 50%, #10b981 100%)",
+          }}
+        />
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default AuthPage;
+export default AuthPage

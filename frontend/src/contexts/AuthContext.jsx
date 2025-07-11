@@ -44,17 +44,13 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       setError(null);
       
-      // Récupérer le token CSRF
       await api.get('/sanctum/csrf-cookie',{withCredentials: true});
       
-      // Se connecter
       const response = await api.post('api/login', { 
         email, 
         password 
       });
-      // stocker access_token dans le localstorage
       localStorage.setItem('access_token', response.data.access_token);
-      // Récupérer les infos utilisateur
       const userResponse = await api.get('api/user');  
       const userData = Array.isArray(userResponse.data) ? userResponse.data[0] : userResponse.data;
       
@@ -77,7 +73,6 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       setError(null);
       
-      // S'inscrire
       const response = await api.post('api/register', {
         name: userData.name.trim(),
         email: userData.email.trim(),
@@ -86,7 +81,6 @@ export const AuthProvider = ({ children }) => {
         role: userData.role || 'collaborateur'
       });
       
-      // Se connecter automatiquement après l'inscription
       await api.post('api/login', {
         email: userData.email,
         password: userData.password

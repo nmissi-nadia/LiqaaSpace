@@ -17,14 +17,16 @@ return [
 
     'paths' => [
         'api/*',
-        'sanctum/csrf-cookie',
+        'sanctum/*',
+        'broadcasting/*',
         'login',
         'logout',
         'user',
-        'register'
+        'register',
+        '*'
     ],
     'allowed_methods' => ['*'],
-    'allowed_origins' => ['http://localhost:3000'],
+    'allowed_origins' => ['http://localhost:3000','http://127.0.0.1:8000'],
     'allowed_origins_patterns' => [],
     'allowed_headers' => ['*'],
     'exposed_headers' => ['*'],

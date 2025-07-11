@@ -12,7 +12,7 @@ import {
   BellOutlined,
   MessageOutlined,
 } from "@ant-design/icons"
-import { Logo } from "../common/logo"
+import Logo from "../common/logo"
 import NotificationSidebar from "../../pages/NotificationSidebar";
 import { useAuth } from "../../contexts/AuthContext";
 const { Header, Sider, Content } = Layout

@@ -9,7 +9,7 @@ use App\Http\Controllers\API\DisponibiliteController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\StatsController;
 use App\Http\Controllers\API\NotificationController;
-use App\Http\Controllers\API\MessageController;
+use App\Http\Controllers\MessageController;
 use Illuminate\Support\Facades\Broadcast;
 /*
 |--------------------------------------------------------------------------
@@ -25,6 +25,7 @@ Route::middleware('web')->group(function () {
     // Authentification
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login'])->name('login');
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::post('/forgot-password', [AuthController::class, 'Mpsasseoubli'])->name('password.forgot');
     Route::post('/reset-password', [AuthController::class, 'resetMps'])->name('password.reset');
     
@@ -121,7 +122,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Broadcast::routes(['middleware' => ['auth:sanctum']]);
 
-Route::middleware('auth:api')->group(function () {
+Route::middleware('auth:sanctum')->group(function () {
     Route::get('/messages', [MessageController::class, 'index']);
     Route::post('/messages', [MessageController::class, 'store']);
 });

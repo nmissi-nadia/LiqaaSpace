@@ -14,7 +14,7 @@ import {
   CloseOutlined,
   MessageOutlined,
 } from "@ant-design/icons"
-import { Logo } from "../common/logo"
+import  Logo  from "../common/logo"
 import NotificationSidebar from "../../pages/NotificationSidebar";
 const { Header, Sider, Content } = Layout
 

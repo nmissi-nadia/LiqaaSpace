@@ -17,12 +17,23 @@ const Chat = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [userRes, messagesRes] = await Promise.all([
-          api.get('/api/user'),
-          api.get('/api/messages')
+        const userRes= await Promise.all([
+          api.get('api/user', {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+              'Accept': 'application/json',
+            },
+          })
         ]);
+        console.log('userRes.data', userRes.data);
+        const messagesRes = await api.get('api/messages', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+            'Accept': 'application/json',
+          },
+        });
         
-        setMessages(messagesRes.data.reverse()); // Inverser pour avoir les plus récents en bas
+        setMessages(messagesRes.data.reverse()); 
       } catch (err) {
         console.error('Erreur:', err);
         setError('Impossible de charger les données du chat');
@@ -56,9 +67,61 @@ const Chat = () => {
   }, []);
 
   // Faire défiler vers le bas à chaque nouveau message
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  // Récupérer l'utilisateur et les messages
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // 1. D'abord, récupérer le jeton CSRF
+      try {
+        await api.get('/sanctum/csrf-cookie');
+      } catch (csrfError) {
+        console.error('Erreur CSRF:', csrfError);
+      }
+
+      // 2. Ensuite, récupérer les données utilisateur
+      const userResponse = await api.get('/api/user').catch(userErr => {
+        console.error('Erreur utilisateur:', userErr);
+        throw userErr;
+      });
+
+      // 3. Enfin, récupérer les messages
+      const messagesResponse = await api.get('/api/messages').catch(msgErr => {
+        console.error('Erreur messages:', msgErr);
+        throw msgErr;
+      });
+
+      if (messagesResponse.data && messagesResponse.data.messages) {
+        setMessages(messagesResponse.data.messages);
+      } else {
+        console.error('Format de réponse inattendu:', messagesResponse);
+        setError('Format de réponse inattendu du serveur');
+      }
+      
+    } catch (err) {
+      console.error('Erreur détaillée:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status,
+        config: err.config
+      });
+      
+      if (err.response?.status === 401) {
+        // Non authentifié
+        localStorage.removeItem('access_token');
+        window.location.href = '/auth';
+      } else {
+        setError('Impossible de charger les messages. Veuillez réessayer.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  fetchData();
+}, []);
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -77,25 +140,30 @@ const Chat = () => {
   const sendMessage = async (e) => {
     e.preventDefault();
     if ((!message.trim() && !file) || isSending) return;
-
+  
     const formData = new FormData();
     if (message.trim()) formData.append('message', message.trim());
     if (file) formData.append('file', file);
-
+  
     setIsSending(true);
     setError(null);
-
+  
     try {
-      await api.post('/api/messages', formData, {
+      const response = await api.post('/api/messages', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
+      
       setMessage('');
       setFile(null);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
+      
+      // Mettre à jour les messages avec la réponse
+      setMessages(prev => [...prev, response.data.message]);
+      
     } catch (error) {
       console.error('Erreur détaillée:', {
         message: error.message,
@@ -103,7 +171,18 @@ const Chat = () => {
         status: error.response?.status,
       });
       
-      setError(error.response?.data?.error || 'Erreur lors de l\'envoi du message');
+      // Afficher un message d'erreur plus détaillé
+      const errorMessage = error.response?.data?.error || 
+                          error.response?.data?.message || 
+                          'Erreur lors de l\'envoi du message';
+      
+      setError(errorMessage);
+      
+      // Si le token a expiré, rediriger vers la page de connexion
+      if (error.response?.status === 401) {
+        localStorage.removeItem('access_token');
+        window.location.href = '/auth';
+      }
     } finally {
       setIsSending(false);
     }

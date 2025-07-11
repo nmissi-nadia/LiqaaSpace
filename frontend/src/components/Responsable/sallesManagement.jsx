@@ -33,7 +33,7 @@ import {
   ExclamationCircleOutlined,
   CloseCircleOutlined,
 } from "@ant-design/icons"
-import axios from "axios"
+import api from "../../services/api"
 
 const { Title, Text } = Typography
 const { TextArea } = Input
@@ -72,11 +72,7 @@ const SallesManagement = () => {
   const fetchRooms = async () => {
     try {
       setLoading(true)
-      const response = await axios.get("http://localhost:8000/api/salles", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-        },
-      })
+      const response = await api.get("/api/salles")
       setRooms(response.data)
     } catch (error) {
       console.error("Erreur de chargement:", error)
@@ -162,10 +158,10 @@ const SallesManagement = () => {
       }
 
       if (editingRoom) {
-        await axios.put(`http://localhost:8000/api/salles/${editingRoom}`, formData, config)
+        await api.put(`/api/salles/${editingRoom}`, formData, config)
         message.success("Salle modifiée avec succès")
       } else {
-        await axios.post("http://localhost:8000/api/salles", formData, config)
+        await api.post("/api/salles", formData, config)
         message.success("Salle ajoutée avec succès")
       }
 
@@ -181,11 +177,7 @@ const SallesManagement = () => {
 
   const handleDeleteRoom = async (id) => {
     try {
-      await axios.delete(`http://localhost:8000/api/salles/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-        },
-      })
+      await api.delete(`/api/salles/${id}`)
       message.success("Salle supprimée avec succès")
       fetchRooms()
     } catch (error) {
